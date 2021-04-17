@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>CS-537 Final Project</title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <h1>CS-537 Final Project</h1>
+
+        <div>
+            <span>Jordan Handwerger</span>
+            <span>Jack Brummer</span>
+            <span>Tyler Sulsenti</span>
+        </div>
+
+        <canvas id="gl-canvas" width="512" height="512">
+            Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+
+        <div>
+            <p>
+                This wil display the list of objects and the customization
+                elements.
+            </p>
+        </div>
+
+        <!-- obj shaders -->
+        <!-- TODO: complete the shaders -->
+        <script id="kitty-vertex-shader" type="x-shader/x-vertex"></script>
+        <script id="kitty-fragment-shader" type="x-shader/x-fragment"></script>
+
+        <script id="pumpkin-vertex-shader" type="x-shader/x-vertex"></script>
+        <script
+            id="pumpkin-fragment-shader"
+            type="x-shader/x-fragment"
+        ></script>
+
+        <script id="puppy-vertex-shader" type="x-shader/x-vertex"></script>
+        <script id="puppy-fragment-shader" type="x-shader/x-fragment"></script>
+
+        <script id="rock-vertex-shader" type="x-shader/x-vertex"></script>
+        <script id="rock-fragment-shader" type="x-shader/x-fragment"></script>
+
+        <!-- required scripts -->
+        <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+        <script type="text/javascript" src="../Common/initShaders.js"></script>
+        <script type="text/javascript" src="../Common/MV.js"></script>
+        <script type="text/javascript" src="objLoader.js"></script>
+        <script type="text/javascript" src="project.js"></script>
+
+        <!-- texture images -->
+        <img alt="kittyTexture" id="kittyTexture" src="./objs/kitty/color.tga" hidden></img>
+        <img alt="kittyNormal" id="kittyNormal" src="./objs/kitty/normal.tga" hidden></img>
+
+        <img alt="pumpkinTexture" id="pumpkinTexture" src="./objs/pumpkin/pumpkin_color.jpg" hidden></img>
+        <img alt="pumpkinBump" id="pumpkinBump" src="./objs/pumpkin/pumpkin_bump.jpg" hidden></img>
+        <img alt="stalkTexture" id="stalkTexture" src="./objs/pumpkin/stalk_color.jpg" hidden></img>
+        <img alt="stalkBump" id="stalkBump" src="./objs/pumpkin/stalk_bump.jpg" hidden></img>
+
+        <img alt="puppyTexture" id="puppyTexture" src="./objs/puppy/color.tga" hidden></img>
+        <img alt="puppyNormal" id="puppyNormal" src="./objs/puppy/normal.tga" hidden></img>
+
+        <img alt="rockTexture" id="rockTexture" src="./objs/rock/color.jpg" hidden></img>
+        <img alt="rockNormal" id="rockNormal" src="./objs/rock/normal.jpg" hidden></img>
+        <img alt="rockGlossiness" id="rockGlossiness" src="./objs/rock/glossiness.jpg" hidden></img>
+        <img alt="rockOcclusion" id="rockOcclusion" src="./objs/rock/occlusion.jpg" hidden></img>
+        <img alt="rockSpecular" id="rockSpecular" src="./objs/rock/specular.jpg" hidden></img>
+    </body>
+</html>
