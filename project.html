@@ -13,6 +13,34 @@
             <span>Tyler Sulsenti</span>
         </div>
 
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            // TODO: Edit the vertex shader.
+            attribute  vec4 vPosition;
+            //attribute vec4 vColor;
+
+            varying vec4 fColor;
+
+            void main()
+            {
+                fColor = vec4(0.0, 0.0, 1.0, 1.0);
+                //fColor = vColor;
+                gl_Position = vPosition;
+                gl_Position.z = -gl_Position.z;
+            }
+            </script>
+
+            <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            varying vec4 fColor;
+
+            void
+            main()
+            {
+                gl_FragColor = fColor;
+            }
+            </script>
+
         <canvas id="gl-canvas" width="512" height="512">
             Oops ... your browser doesn't support the HTML5 canvas element
         </canvas>
