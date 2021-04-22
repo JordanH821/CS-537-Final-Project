@@ -53,8 +53,26 @@
             type="x-shader/x-fragment"
         ></script>
 
-        <script id="puppy-vertex-shader" type="x-shader/x-vertex"></script>
-        <script id="puppy-fragment-shader" type="x-shader/x-fragment"></script>
+        <script id="puppy-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+            void main()
+            {
+                gl_Position =  vPosition;
+            }
+        </script>
+        <script id="puppy-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            void main()
+            {
+                gl_FragColor =  vec4(1.0, 0.0, 0.0, 1.0);
+            }
+        </script>
 
         <script id="rock-vertex-shader" type="x-shader/x-vertex"></script>
         <script id="rock-fragment-shader" type="x-shader/x-fragment"></script>

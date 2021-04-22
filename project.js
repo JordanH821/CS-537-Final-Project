@@ -10,11 +10,22 @@ var modelViewMatrix = lookAt(
 );
 var projectionMatrix = perspective(90.0, aspect, 0.2, 100);
 
+let currentObject = 0;
+let objectList = [];
+
 let kitty = {
     objPath: './objs/kitty/kitty.obj',
     vertexShader: 'kitty-vertex-shader',
     fragmentShader: 'kitty-fragment-shader',
 };
+objectList.push(kitty);
+
+let puppy = {
+    objPath: './objs/puppy/Puppy.obj',
+    vertexShader: 'puppy-vertex-shader',
+    fragmentShader: 'puppy-fragment-shader',
+};
+objectList.push(puppy);
 
 function getOrderedNormalsFromObj(o) {
     var normalsOrderedWithVertices = new Array(o.c_verts.length);
@@ -49,94 +60,99 @@ function getOrderedTextureCoordsFromObj(o) {
     return texCoordsOrderedWithVertices;
 }
 
-function loadedKitty(data, _callback) {
-    let kitty_obj = loadOBJFromBuffer(data);
-    console.log(kitty_obj);
-    kitty['indices'] = kitty_obj.i_verts;
-    kitty['vertices'] = kitty_obj.c_verts;
-    kitty['numVerts'] = kitty['indices'].length;
-    kitty['normals'] = getOrderedNormalsFromObj(kitty_obj);
-    kitty['texCoords'] = getOrderedTextureCoordsFromObj(kitty_obj);
-    _callback();
+function loadedObj(data) {
+    let obj = loadOBJFromBuffer(data);
+    let jsObj = objectList[currentObject];
+    jsObj['indices'] = obj.i_verts;
+    jsObj['vertices'] = obj.c_verts;
+    jsObj['numVerts'] = jsObj['indices'].length;
+    jsObj['normals'] = getOrderedNormalsFromObj(obj);
+    jsObj['texCoords'] = getOrderedTextureCoordsFromObj(obj);
+    currentObject++;
+    if (currentObject < objectList.length) {
+        loadOBJFromPath(objectList[currentObject]['objPath'], loadedObj);
+    } else {
+        setupAfterDataLoad();
+    }
 }
 
-function setupKittyShaderBuffers() {
+function setupObjectShaderBuffers(obj) {
     // init shaders
-    kitty['shader'] = initShaders(
-        gl,
-        kitty['vertexShader'],
-        kitty['fragmentShader']
-    );
+    obj['shader'] = initShaders(gl, obj['vertexShader'], obj['fragmentShader']);
 
     // use shaders
-    gl.useProgram(kitty['shader']);
+    gl.useProgram(obj['shader']);
 
     // index buffer
-    kitty['indexBuffer'] = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, kitty['indexBuffer']);
+    obj['indexBuffer'] = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj['indexBuffer']);
     gl.bufferData(
         gl.ELEMENT_ARRAY_BUFFER,
-        new Uint16Array(kitty['indices']),
+        new Uint16Array(obj['indices']),
         gl.STATIC_DRAW
     );
 
     // vertex buffer
-    kitty['vertexBuffer'] = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, kitty['vertexBuffer']);
+    obj['vertexBuffer'] = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['vertexBuffer']);
     gl.bufferData(
         gl.ARRAY_BUFFER,
-        new Float32Array(kitty['vertices']),
+        new Float32Array(obj['vertices']),
         gl.STATIC_DRAW
     );
 
     // model view matrix location
-    kitty['modelViewMatrixLoc'] = gl.getUniformLocation(
-        kitty['shader'],
+    obj['modelViewMatrixLoc'] = gl.getUniformLocation(
+        obj['shader'],
         'modelViewMatrix'
     );
 
     // projection matrix location
-    kitty['projectionMatrixLoc'] = gl.getUniformLocation(
-        kitty['shader'],
+    obj['projectionMatrixLoc'] = gl.getUniformLocation(
+        obj['shader'],
         'projectionMatrix'
     );
 
     // vertex position
-    kitty['vPosition'] = gl.getAttribLocation(kitty['shader'], 'vPosition');
+    obj['vPosition'] = gl.getAttribLocation(obj['shader'], 'vPosition');
 }
 
-function renderKitty() {
-    gl.useProgram(kitty['shader']);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, kitty['indexBuffer']);
+function renderObject(obj) {
+    gl.useProgram(obj['shader']);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj['indexBuffer']);
 
     // pass vertices
-    gl.bindBuffer(gl.ARRAY_BUFFER, kitty['vertexBuffer']);
-    gl.vertexAttribPointer(kitty['vPosition'], 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(kitty['vPosition']);
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['vertexBuffer']);
+    gl.vertexAttribPointer(obj['vPosition'], 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(obj['vPosition']);
 
     // pass camera matrices
     gl.uniformMatrix4fv(
-        kitty['modelViewMatrixLoc'],
+        obj['modelViewMatrixLoc'],
         false,
         flatten(modelViewMatrix)
     );
     gl.uniformMatrix4fv(
-        kitty['projectionMatrixLoc'],
+        obj['projectionMatrixLoc'],
         false,
         flatten(projectionMatrix)
     );
-    gl.drawElements(gl.TRIANGLES, kitty['numVerts'], gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, obj['numVerts'], gl.UNSIGNED_SHORT, 0);
 }
 
 function setupAfterDataLoad() {
     gl.enable(gl.DEPTH_TEST);
-    setupKittyShaderBuffers();
+    for (const obj of objectList) {
+        setupObjectShaderBuffers(obj);
+    }
     render();
 }
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    renderKitty();
+    for (const obj of objectList) {
+        renderObject(obj);
+    }
     requestAnimationFrame(render);
 }
 
@@ -153,8 +169,6 @@ window.onload = function init() {
     aspect = canvas.width / canvas.height;
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
 
-    // load kitty
-    loadOBJFromPath(kitty['objPath'], loadedKitty, () => {
-        setupAfterDataLoad();
-    });
+    // start loading objects
+    loadOBJFromPath(objectList[0]['objPath'], loadedObj);
 };
