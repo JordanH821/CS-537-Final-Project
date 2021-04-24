@@ -26,6 +26,30 @@
 
         <!-- obj shaders -->
         <!-- TODO: complete the shaders -->
+        <script id="bunny-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+            // scale
+            uniform mat4 scale;
+
+            void main()
+            {
+                gl_Position = scale * vPosition;
+            }
+        </script>
+        <script id="bunny-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            void main()
+            {
+                gl_FragColor =  vec4(1.0, 0.0, 0.0, 1.0);
+            }
+        </script>
+
         <script id="kitty-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
 
@@ -33,9 +57,13 @@
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
 
+            // scale
+            uniform mat4 scale;
+            uniform mat4 translation;
+
             void main()
             {
-                gl_Position =  vPosition;
+                gl_Position =  translation * scale * vPosition;
             }
         </script>
         <script id="kitty-fragment-shader" type="x-shader/x-fragment">
@@ -60,9 +88,13 @@
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
 
+            // scale
+            uniform mat4 scale;
+            uniform mat4 translation;
+
             void main()
             {
-                gl_Position =  vPosition;
+                gl_Position = translation * scale * vPosition;
             }
         </script>
         <script id="puppy-fragment-shader" type="x-shader/x-fragment">

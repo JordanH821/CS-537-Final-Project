@@ -4,9 +4,9 @@ var canvas;
 var gl;
 var aspect;
 var modelViewMatrix = lookAt(
-    vec3(0.0, 0.0, 0.0),
-    vec3(0, 0, -10),
-    vec3(0, 1, 0)
+    vec3(0.0, 0.0, 1) /* */,
+    vec3(0, 0, 0) /* looking at */,
+    vec3(0, 1, 0) /* up */
 );
 var projectionMatrix = perspective(90.0, aspect, 0.2, 100);
 
@@ -17,6 +17,8 @@ let kitty = {
     objPath: './objs/kitty/kitty.obj',
     vertexShader: 'kitty-vertex-shader',
     fragmentShader: 'kitty-fragment-shader',
+    scale: scalem(0.01, 0.01, 0.01),
+    translation: translate(0.25, 0.25, 0),
 };
 objectList.push(kitty);
 
@@ -24,8 +26,19 @@ let puppy = {
     objPath: './objs/puppy/Puppy.obj',
     vertexShader: 'puppy-vertex-shader',
     fragmentShader: 'puppy-fragment-shader',
+    scale: scalem(0.01, 0.01, 0.01),
+    translation: translate(-0.25, 0.25, 0),
 };
 objectList.push(puppy);
+
+let bunny = {
+    objPath: '../Assignment2/bunny.obj',
+    vertexShader: 'bunny-vertex-shader',
+    fragmentShader: 'bunny-fragment-shader',
+    scale: scalem(2, 2, 2),
+    translation: mat4(),
+};
+objectList.push(bunny);
 
 function getOrderedNormalsFromObj(o) {
     var normalsOrderedWithVertices = new Array(o.c_verts.length);
@@ -62,6 +75,7 @@ function getOrderedTextureCoordsFromObj(o) {
 
 function loadedObj(data) {
     let obj = loadOBJFromBuffer(data);
+    console.log(obj);
     let jsObj = objectList[currentObject];
     jsObj['indices'] = obj.i_verts;
     jsObj['vertices'] = obj.c_verts;
@@ -113,6 +127,12 @@ function setupObjectShaderBuffers(obj) {
         'projectionMatrix'
     );
 
+    // scale matrix
+    obj['scaleLoc'] = gl.getUniformLocation(obj['shader'], 'scale');
+
+    // translation matrix
+    obj['translationLoc'] = gl.getUniformLocation(obj['shader'], 'translation');
+
     // vertex position
     obj['vPosition'] = gl.getAttribLocation(obj['shader'], 'vPosition');
 }
@@ -132,11 +152,23 @@ function renderObject(obj) {
         false,
         flatten(modelViewMatrix)
     );
+
     gl.uniformMatrix4fv(
         obj['projectionMatrixLoc'],
         false,
         flatten(projectionMatrix)
     );
+
+    // pass scale
+    gl.uniformMatrix4fv(obj['scaleLoc'], false, flatten(obj['scale']));
+
+    // pass translation
+    gl.uniformMatrix4fv(
+        obj['translationLoc'],
+        false,
+        flatten(obj['translation'])
+    );
+
     gl.drawElements(gl.TRIANGLES, obj['numVerts'], gl.UNSIGNED_SHORT, 0);
 }
 
