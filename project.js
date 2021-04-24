@@ -20,6 +20,7 @@ let kitty = {
     fragmentShader: 'kitty-fragment-shader',
     scale: scalem(0.01, 0.01, 0.01),
     translation: translate(0.25, 0.25, 0),
+    rotation: rotate(180, 0, 1, 0),
 };
 objectList.push(kitty);
 
@@ -30,6 +31,7 @@ let puppy = {
     fragmentShader: 'puppy-fragment-shader',
     scale: scalem(0.01, 0.01, 0.01),
     translation: translate(-0.25, 0.25, 0),
+    rotation: rotate(180, 0, 1, 0),
 };
 objectList.push(puppy);
 
@@ -159,6 +161,9 @@ function setupObjectShaderBuffers(obj) {
     // translation matrix
     obj['translationLoc'] = gl.getUniformLocation(obj['shader'], 'translation');
 
+    // rotation matrix
+    obj['rotationLoc'] = gl.getUniformLocation(obj['shader'], 'rotation');
+
     // vertex position
     obj['vPosition'] = gl.getAttribLocation(obj['shader'], 'vPosition');
 
@@ -202,6 +207,9 @@ function renderObject(obj) {
         false,
         flatten(obj['translation'])
     );
+
+    // pass rotation
+    gl.uniformMatrix4fv(obj['rotationLoc'], false, flatten(obj['rotation']));
 
     // pass default texture
     gl.activeTexture(gl.TEXTURE0);

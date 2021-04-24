@@ -34,9 +34,10 @@
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
 
-            // scale
+            // scale, translation, rotation
             uniform mat4 scale;
             uniform mat4 translation;
+            uniform mat4 rotation;
 
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
@@ -46,7 +47,7 @@
                 // pass texture texture coord
                 fTexCoord = tPosition;
 
-                gl_Position =  translation * scale * vPosition;
+                gl_Position =  translation * rotation * scale * vPosition;
             }
         </script>
         <script id="kitty-fragment-shader" type="x-shader/x-fragment">
@@ -76,9 +77,10 @@
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
 
-            // scale
+            // scale, translation, rotation
             uniform mat4 scale;
             uniform mat4 translation;
+            uniform mat4 rotation;
 
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
@@ -86,7 +88,7 @@
             void main()
             {
                 fTexCoord = tPosition;
-                gl_Position = translation * scale * vPosition;
+                gl_Position = translation * rotation * scale * vPosition;
             }
         </script>
         <script id="puppy-fragment-shader" type="x-shader/x-fragment">
