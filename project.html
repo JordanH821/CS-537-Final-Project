@@ -13,34 +13,6 @@
             <span>Tyler Sulsenti</span>
         </div>
 
-        <script id="vertex-shader" type="x-shader/x-vertex">
-            // TODO: Edit the vertex shader.
-            attribute  vec4 vPosition;
-            //attribute vec4 vColor;
-
-            varying vec4 fColor;
-
-            void main()
-            {
-                fColor = vec4(0.0, 0.0, 1.0, 1.0);
-                //fColor = vColor;
-                gl_Position = vPosition;
-                gl_Position.z = -gl_Position.z;
-            }
-            </script>
-
-            <script id="fragment-shader" type="x-shader/x-fragment">
-            precision mediump float;
-
-            varying vec4 fColor;
-
-            void
-            main()
-            {
-                gl_FragColor = fColor;
-            }
-            </script>
-
         <canvas id="gl-canvas" width="512" height="512">
             Oops ... your browser doesn't support the HTML5 canvas element
         </canvas>
@@ -54,8 +26,26 @@
 
         <!-- obj shaders -->
         <!-- TODO: complete the shaders -->
-        <script id="kitty-vertex-shader" type="x-shader/x-vertex"></script>
-        <script id="kitty-fragment-shader" type="x-shader/x-fragment"></script>
+        <script id="kitty-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+            void main()
+            {
+                gl_Position =  vPosition;
+            }
+        </script>
+        <script id="kitty-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            void main()
+            {
+                gl_FragColor =  vec4(1.0, 0.0, 0.0, 1.0);
+            }
+        </script>
 
         <script id="pumpkin-vertex-shader" type="x-shader/x-vertex"></script>
         <script
@@ -63,8 +53,26 @@
             type="x-shader/x-fragment"
         ></script>
 
-        <script id="puppy-vertex-shader" type="x-shader/x-vertex"></script>
-        <script id="puppy-fragment-shader" type="x-shader/x-fragment"></script>
+        <script id="puppy-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+            void main()
+            {
+                gl_Position =  vPosition;
+            }
+        </script>
+        <script id="puppy-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            void main()
+            {
+                gl_FragColor =  vec4(1.0, 0.0, 0.0, 1.0);
+            }
+        </script>
 
         <script id="rock-vertex-shader" type="x-shader/x-vertex"></script>
         <script id="rock-fragment-shader" type="x-shader/x-fragment"></script>

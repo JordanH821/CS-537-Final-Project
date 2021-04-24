@@ -1,97 +1,174 @@
-"use strict";
+'use strict';
 
 var canvas;
 var gl;
+var aspect;
+var modelViewMatrix = lookAt(
+    vec3(0.0, 0.0, 0.0),
+    vec3(0, 0, -10),
+    vec3(0, 1, 0)
+);
+var projectionMatrix = perspective(90.0, aspect, 0.2, 100);
 
-var numVerticesInAllCovidVaxFaces;
+let currentObject = 0;
+let objectList = [];
 
-var covid_vaccine_indicies;
-var covid_vaccine_verts;
-//var bunny_vertex_colors;
+let kitty = {
+    objPath: './objs/kitty/kitty.obj',
+    vertexShader: 'kitty-vertex-shader',
+    fragmentShader: 'kitty-fragment-shader',
+};
+objectList.push(kitty);
 
-var m;
+let puppy = {
+    objPath: './objs/puppy/Puppy.obj',
+    vertexShader: 'puppy-vertex-shader',
+    fragmentShader: 'puppy-fragment-shader',
+};
+objectList.push(puppy);
 
-
-// We're starting out by rendering this cube with tmp_vertices and tmp_indices.
-// TODO: Change the file to render the bunny shape and then delete these two variables.
-
-// You probably don't want to change this function.
-function loaded(data, _callback)
-{
-    m = loadOBJFromBuffer(data);
-    covid_vaccine_indicies = m.i_verts;
-    covid_vaccine_verts = m.c_verts;
-    numVerticesInAllCovidVaxFaces = covid_vaccine_indicies.length;
-    //bunny_vertex_colors = assign_vertex_colors(bunny_vertices);
-    _callback();
+function getOrderedNormalsFromObj(o) {
+    var normalsOrderedWithVertices = new Array(o.c_verts.length);
+    let VI = o.i_verts,
+        NI = o.i_norms,
+        NC = o.c_norms;
+    for (let i = 0; i < VI.length; i++) {
+        let x = VI[i] * 3;
+        let y = NI[i] * 3;
+        normalsOrderedWithVertices[x] = NC[y];
+        normalsOrderedWithVertices[x + 1] = NC[y + 1];
+        normalsOrderedWithVertices[x + 2] = NC[y + 2];
+    }
+    return normalsOrderedWithVertices;
 }
 
-// You probably don't want to change this function.
-window.onload = function init()
-{
-    canvas = document.getElementById( "gl-canvas" );
-
-    gl = WebGLUtils.setupWebGL( canvas );
-    if ( !gl ) { alert( "WebGL isn't available" ); }
-
-    gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
-
-    // Load OBJ file using objLoader.js functions
-    // These callbacks ensure the data is loaded before rendering occurs.
-    loadOBJFromPath("objs/covid_vaccine/SARS_CoV_2_Vaccine.obj", loaded, setup_after_data_load);
-}
-
-// TODO: Edit this function.
-function setup_after_data_load(){
-    
-    gl.enable(gl.DEPTH_TEST);
-    
-    // Load shaders and initialize attribute buffers
-    var program = initShaders( gl, "vertex-shader", "fragment-shader" );
-    gl.useProgram( program );
-
-    // Array element buffer
-    var iBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(covid_vaccine_indicies), gl.STATIC_DRAW);
-
-
-    // Vertex array attribute buffer
-    var vBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array(covid_vaccine_verts), gl.STATIC_DRAW );
-
-    var vPosition = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPosition );
-
-    /*pLoc = gl.getUniformLocation(program, "p");
-    mvLoc = gl.getUniformLocation(program, "mv");
-
-   var bufferIdColors = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, bufferIdColors );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(bunny_vertex_colors), gl.STATIC_DRAW );
-
-    
-    // Associate shader variables with our vertex data buffer.
-    var vColor = gl.getAttribLocation( program, "vColor" );
-    gl.vertexAttribPointer( vColor, 3, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vColor );*/
-        render();   
+function getOrderedTextureCoordsFromObj(o) {
+    let l = o.i_verts.length;
+    let VI = o.i_verts,
+        TI = o.i_uvt,
+        TC = o.c_uvt;
+    var texCoordsOrderedWithVertices = new Array(o.c_verts.length);
+    texCoordsOrderedWithVertices.fill(-1);
+    for (let i = 0; i < l; i++) {
+        let x = VI[i] * 3;
+        let y = TI[i] * 2;
+        texCoordsOrderedWithVertices[x] = TC[y];
+        texCoordsOrderedWithVertices[x + 1] = TC[y + 1];
+        texCoordsOrderedWithVertices[x + 2] = 0;
     }
 
-
-
-// TODO: Edit this function.
-function render()
-{
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-    //gl.uniformMatrix4fv(mvLoc, gl.FALSE, flatten(mv));
-
-    gl.drawElements( gl.TRIANGLES, numVerticesInAllCovidVaxFaces, gl.UNSIGNED_SHORT, 0 );
-
-    requestAnimFrame( render );
+    return texCoordsOrderedWithVertices;
 }
 
+function loadedObj(data) {
+    let obj = loadOBJFromBuffer(data);
+    let jsObj = objectList[currentObject];
+    jsObj['indices'] = obj.i_verts;
+    jsObj['vertices'] = obj.c_verts;
+    jsObj['numVerts'] = jsObj['indices'].length;
+    jsObj['normals'] = getOrderedNormalsFromObj(obj);
+    jsObj['texCoords'] = getOrderedTextureCoordsFromObj(obj);
+    currentObject++;
+    if (currentObject < objectList.length) {
+        loadOBJFromPath(objectList[currentObject]['objPath'], loadedObj);
+    } else {
+        setupAfterDataLoad();
+    }
+}
+
+function setupObjectShaderBuffers(obj) {
+    // init shaders
+    obj['shader'] = initShaders(gl, obj['vertexShader'], obj['fragmentShader']);
+
+    // use shaders
+    gl.useProgram(obj['shader']);
+
+    // index buffer
+    obj['indexBuffer'] = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj['indexBuffer']);
+    gl.bufferData(
+        gl.ELEMENT_ARRAY_BUFFER,
+        new Uint16Array(obj['indices']),
+        gl.STATIC_DRAW
+    );
+
+    // vertex buffer
+    obj['vertexBuffer'] = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['vertexBuffer']);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(obj['vertices']),
+        gl.STATIC_DRAW
+    );
+
+    // model view matrix location
+    obj['modelViewMatrixLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'modelViewMatrix'
+    );
+
+    // projection matrix location
+    obj['projectionMatrixLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'projectionMatrix'
+    );
+
+    // vertex position
+    obj['vPosition'] = gl.getAttribLocation(obj['shader'], 'vPosition');
+}
+
+function renderObject(obj) {
+    gl.useProgram(obj['shader']);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj['indexBuffer']);
+
+    // pass vertices
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['vertexBuffer']);
+    gl.vertexAttribPointer(obj['vPosition'], 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(obj['vPosition']);
+
+    // pass camera matrices
+    gl.uniformMatrix4fv(
+        obj['modelViewMatrixLoc'],
+        false,
+        flatten(modelViewMatrix)
+    );
+    gl.uniformMatrix4fv(
+        obj['projectionMatrixLoc'],
+        false,
+        flatten(projectionMatrix)
+    );
+    gl.drawElements(gl.TRIANGLES, obj['numVerts'], gl.UNSIGNED_SHORT, 0);
+}
+
+function setupAfterDataLoad() {
+    gl.enable(gl.DEPTH_TEST);
+    for (const obj of objectList) {
+        setupObjectShaderBuffers(obj);
+    }
+    render();
+}
+
+function render() {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    for (const obj of objectList) {
+        renderObject(obj);
+    }
+    requestAnimationFrame(render);
+}
+
+window.onload = function init() {
+    canvas = document.getElementById('gl-canvas');
+
+    gl = WebGLUtils.setupWebGL(canvas);
+    if (!gl) {
+        alert("WebGL isn't available");
+    }
+
+    // setup gl vars
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    aspect = canvas.width / canvas.height;
+    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+
+    // start loading objects
+    loadOBJFromPath(objectList[0]['objPath'], loadedObj);
+};
