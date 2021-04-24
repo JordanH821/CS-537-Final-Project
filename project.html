@@ -26,6 +26,30 @@
 
         <!-- obj shaders -->
         <!-- TODO: complete the shaders -->
+        <script id="bunny-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+            // scale
+            uniform mat4 scale;
+
+            void main()
+            {
+                gl_Position = scale * vPosition;
+            }
+        </script>
+        <script id="bunny-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            void main()
+            {
+                gl_FragColor =  vec4(1.0, 0.0, 0.0, 1.0);
+            }
+        </script>
+
         <script id="kitty-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
 
@@ -33,9 +57,13 @@
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
 
+            // scale
+            uniform mat4 scale;
+            uniform mat4 translation;
+
             void main()
             {
-                gl_Position =  vPosition;
+                gl_Position =  translation * scale * vPosition;
             }
         </script>
         <script id="kitty-fragment-shader" type="x-shader/x-fragment">
@@ -60,9 +88,13 @@
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
 
+            // scale
+            uniform mat4 scale;
+            uniform mat4 translation;
+
             void main()
             {
-                gl_Position =  vPosition;
+                gl_Position = translation * scale * vPosition;
             }
         </script>
         <script id="puppy-fragment-shader" type="x-shader/x-fragment">
@@ -73,6 +105,94 @@
                 gl_FragColor =  vec4(1.0, 0.0, 0.0, 1.0);
             }
         </script>
+
+        <script id="vaccine-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+            attribute  vec2 vTexCoord;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+
+            // scale
+            uniform mat4 scale;
+            uniform mat4 translation;
+
+            varying vec2 fTexCoord;
+
+            void main()
+            {
+                gl_Position =   translation * scale * vPosition;
+                fTexCoord = vTexCoord;
+            }
+        </script>
+        <script id="vaccine-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            varying  vec2 fTexCoord;
+
+            uniform sampler2D texture;
+
+            void main()
+            {
+                gl_FragColor = texture2D(texture, fTexCoord);
+            }
+        </script>
+
+        <script id="wooden_crate-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+            attribute  vec2 vTexCoord;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+
+            // scale
+            uniform mat4 scale;
+            uniform mat4 translation;
+
+            varying vec2 fTexCoord;
+
+            void main()
+            {
+                gl_Position =   translation * scale * vPosition;
+                fTexCoord = vTexCoord;
+            }
+        </script>
+        <script id="wooden_crate-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            varying  vec2 fTexCoord;
+
+            uniform sampler2D texture;
+
+            void main()
+            {
+                gl_FragColor = texture2D(texture, fTexCoord);
+            }
+        </script>
+
+         <script id="bunny-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+            void main()
+            {
+                gl_Position =  vPosition;
+            }
+        </script>
+        <script id="bunny-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            void main()
+            {
+                gl_FragColor =  vec4(1.0, 0.0, 0.0, 1.0);
+            }
+        </script>
+
 
         <script id="rock-vertex-shader" type="x-shader/x-vertex"></script>
         <script id="rock-fragment-shader" type="x-shader/x-fragment"></script>
@@ -95,6 +215,12 @@
 
         <img alt="puppyTexture" id="puppyTexture" src="./objs/puppy/color.tga" hidden></img>
         <img alt="puppyNormal" id="puppyNormal" src="./objs/puppy/normal.tga" hidden></img>
+
+        <img alt="pizzaTexture" id="texture_1" src="./objs/pizza/PIZZA_TEXTURES/512/pizza_5k_BaseColor_512.jpg" hidden></img>
+
+        <img alt="woodenCrateTexture" id="texture_2" src="./objs/box/crate_BaseColor.png" hidden></img>
+
+
 
         <img alt="rockTexture" id="rockTexture" src="./objs/rock/color.jpg" hidden></img>
         <img alt="rockNormal" id="rockNormal" src="./objs/rock/normal.jpg" hidden></img>
