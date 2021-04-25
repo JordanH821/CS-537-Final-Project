@@ -26,20 +26,80 @@
 
         <!-- obj shaders -->
         <!-- TODO: complete the shaders -->
-        <script id="kitty-vertex-shader" type="x-shader/x-vertex"></script>
-        <script id="kitty-fragment-shader" type="x-shader/x-fragment"></script>
-
-        <script id="pumpkin-vertex-shader" type="x-shader/x-vertex"></script>
+        
         <script
-            id="pumpkin-fragment-shader"
+            id="pumpkin-vertex-shader"
             type="x-shader/x-fragment"
-        ></script>
+        >
+            attribute vec4 vPosition;
+            attribute vec2 tPosition;
 
-        <script id="puppy-vertex-shader" type="x-shader/x-vertex"></script>
-        <script id="puppy-fragment-shader" type="x-shader/x-fragment"></script>
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
 
-        <script id="rock-vertex-shader" type="x-shader/x-vertex"></script>
-        <script id="rock-fragment-shader" type="x-shader/x-fragment"></script>
+            // scale, translation, rotation
+            uniform mat4 scale;
+            uniform mat4 translation;
+            uniform mat4 rotation;
+
+            // vars to pass to fragment shader
+            varying vec2 fTexCoord;
+
+            void main()
+            {
+                fTexCoord = tPosition;
+                gl_Position = translation * rotation * scale * vPosition;
+            }
+        
+        </script>
+        <script id="pumpkin-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            // texture vars
+            varying vec2 fTexCoord;
+            uniform sampler2D defaultTex;
+
+            void main()
+            {
+                gl_FragColor =  texture2D( defaultTex, fTexCoord );
+            }
+        </script>
+
+        <script id="rock-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+            attribute vec2 tPosition;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+            // scale, translation, rotation
+            uniform mat4 scale;
+            uniform mat4 translation;
+            uniform mat4 rotation;
+
+            // vars to pass to fragment shader
+            varying vec2 fTexCoord;
+
+            void main()
+            {
+                fTexCoord = tPosition;
+                gl_Position = translation * rotation * scale * vPosition;
+            }
+        </script>
+        <script id="rock-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            // texture vars
+            varying vec2 fTexCoord;
+            uniform sampler2D defaultTex;
+
+            void main()
+            {
+                gl_FragColor =  texture2D( defaultTex, fTexCoord );
+            }
+        </script>
 
         <!-- required scripts -->
         <script type="text/javascript" src="../Common/webgl-utils.js"></script>
@@ -49,16 +109,16 @@
         <script type="text/javascript" src="project.js"></script>
 
         <!-- texture images -->
-        <img alt="kittyTexture" id="kittyTexture" src="./objs/kitty/color.tga" hidden></img>
-        <img alt="kittyNormal" id="kittyNormal" src="./objs/kitty/normal.tga" hidden></img>
+        <img alt="kittyTexture" id="kittyTexture" src="./objs/kitty/color.jpg" hidden></img>
+        <img alt="kittyNormal" id="kittyNormal" src="./objs/kitty/normal.jpg" hidden></img>
 
         <img alt="pumpkinTexture" id="pumpkinTexture" src="./objs/pumpkin/pumpkin_color.jpg" hidden></img>
         <img alt="pumpkinBump" id="pumpkinBump" src="./objs/pumpkin/pumpkin_bump.jpg" hidden></img>
         <img alt="stalkTexture" id="stalkTexture" src="./objs/pumpkin/stalk_color.jpg" hidden></img>
         <img alt="stalkBump" id="stalkBump" src="./objs/pumpkin/stalk_bump.jpg" hidden></img>
 
-        <img alt="puppyTexture" id="puppyTexture" src="./objs/puppy/color.tga" hidden></img>
-        <img alt="puppyNormal" id="puppyNormal" src="./objs/puppy/normal.tga" hidden></img>
+        <img alt="puppyTexture" id="puppyTexture" src="./objs/puppy/color.jpg" hidden></img>
+        <img alt="puppyNormal" id="puppyNormal" src="./objs/puppy/normal.jpg" hidden></img>
 
         <img alt="rockTexture" id="rockTexture" src="./objs/rock/color.jpg" hidden></img>
         <img alt="rockNormal" id="rockNormal" src="./objs/rock/normal.jpg" hidden></img>
