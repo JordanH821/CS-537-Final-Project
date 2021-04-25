@@ -63,11 +63,44 @@
             }
         </script>
 
-        <script id="pumpkin-vertex-shader" type="x-shader/x-vertex"></script>
         <script
-            id="pumpkin-fragment-shader"
+            id="pumpkin-vertex-shader"
             type="x-shader/x-fragment"
-        ></script>
+        >
+            attribute vec4 vPosition;
+            attribute vec2 tPosition;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+            // scale, translation, rotation
+            uniform mat4 scale;
+            uniform mat4 translation;
+            uniform mat4 rotation;
+
+            // vars to pass to fragment shader
+            varying vec2 fTexCoord;
+
+            void main()
+            {
+                fTexCoord = tPosition;
+                gl_Position = translation * rotation * scale * vPosition;
+            }
+        </script>
+
+        <script id="pumpkin-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            // texture vars
+            varying vec2 fTexCoord;
+            uniform sampler2D defaultTex;
+
+            void main()
+            {
+                gl_FragColor =  texture2D( defaultTex, fTexCoord );
+            }
+        </script>
 
         <script id="puppy-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
@@ -91,6 +124,7 @@
                 gl_Position = translation * rotation * scale * vPosition;
             }
         </script>
+
         <script id="puppy-fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
 
@@ -104,8 +138,41 @@
             }
         </script>
 
-        <script id="rock-vertex-shader" type="x-shader/x-vertex"></script>
-        <script id="rock-fragment-shader" type="x-shader/x-fragment"></script>
+        <script id="rock-vertex-shader" type="x-shader/x-vertex">
+            attribute vec4 vPosition;
+            attribute vec2 tPosition;
+
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+            // scale, translation, rotation
+            uniform mat4 scale;
+            uniform mat4 translation;
+            uniform mat4 rotation;
+
+            // vars to pass to fragment shader
+            varying vec2 fTexCoord;
+
+            void main()
+            {
+                fTexCoord = tPosition;
+                gl_Position = translation * rotation * scale * vPosition;
+            }
+        </script>
+
+        <script id="rock-fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+
+            // texture vars
+            varying vec2 fTexCoord;
+            uniform sampler2D defaultTex;
+
+            void main()
+            {
+                gl_FragColor =  texture2D( defaultTex, fTexCoord );
+            }
+        </script>
 
         <!-- required scripts -->
         <script type="text/javascript" src="../Common/webgl-utils.js"></script>
