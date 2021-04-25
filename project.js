@@ -35,6 +35,28 @@ let puppy = {
 };
 objectList.push(puppy);
 
+let pumpkin = {
+    objPath: './objs/pumpkin/pumpkin.obj',
+    textureHtmlId: 'pumpkinTexture',
+    vertexShader: 'pumpkin-vertex-shader',
+    fragmentShader: 'pumpkin-fragment-shader',
+    scale: scalem(0.001, 0.001, 0.001),
+    translation: translate(-0.5, 0.25, 0),
+    rotation: rotate(180, 0, 1, 0),
+};
+objectList.push(pumpkin);
+
+let rock = {
+    objPath: './objs/rock/rock.obj',
+    textureHtmlId: 'rockTexture',
+    vertexShader: 'pumpkin-vertex-shader',
+    fragmentShader: 'pumpkin-fragment-shader',
+    scale: scalem(0.01, 0.01, 0.01),
+    translation: translate(-0.25, 0.0, 0),
+    rotation: rotate(180, 0, 1, 0),
+};
+objectList.push(rock);
+
 function getOrderedNormalsFromObj(o) {
     var normalsOrderedWithVertices = new Array(o.c_verts.length);
     let VI = o.i_verts,
