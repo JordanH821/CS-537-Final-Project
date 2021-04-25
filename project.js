@@ -57,6 +57,28 @@ let rock = {
 };
 objectList.push(rock);
 
+let pizza = {
+    objPath: './objs/pizza/pizza.obj',
+    textureHtmlId: 'pizzaTexture',
+    vertexShader: 'pizza-vertex-shader',
+    fragmentShader: 'pizza-fragment-shader',
+    scale: scalem(1, 1, 1),
+    translation: translate(-0.75, 0.25, 0),
+    rotation: rotate(90, 90, 90, 90),
+};
+objectList.push(pizza);
+
+let wooden_crate = {
+    objPath: './objs/box/wooden crate.obj',
+    textureHtmlId: 'woodenCrateTexture',
+    vertexShader: 'wooden_crate-vertex-shader',
+    fragmentShader: 'wooden_crate-fragment-shader',
+    scale: scalem(0.25, 0.25, 0.25),
+    translation: translate(0.8, 0.25, 0),
+    rotation: rotate(180, 0, 1, 0),
+};
+objectList.push(wooden_crate);
+
 function getOrderedNormalsFromObj(o) {
     var normalsOrderedWithVertices = new Array(o.c_verts.length);
     let VI = o.i_verts,
