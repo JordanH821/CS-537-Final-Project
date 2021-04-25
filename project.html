@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>CS-537 Final Project</title>
-        <meta charset="UTF-8">
-    </head>
-    <body>
+
+<head>
+    <title>CS-537 Final Project</title>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div class="container">
         <h1>CS-537 Final Project</h1>
 
         <div>
@@ -16,17 +19,173 @@
         <canvas id="gl-canvas" width="512" height="512">
             Oops ... your browser doesn't support the HTML5 canvas element
         </canvas>
+    </div>
 
-        <div>
-            <p>
-                This wil display the list of objects and the customization
-                elements.
-            </p>
+    <div class="container justify-content-center">
+        <div class="row justify-content-center">
+            <h2>Customization</h2>
         </div>
+        <div class="row">
+            <h3>Scene Modifications</h3>
+        </div>
+        <div class="row">
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <div class="form-check">
+                    <label for="ambient">
+                        Ambient Light
+                    </label>
+                    <br />
+                    <div>
+                        <small>Intensity</small>
+                        <input id="ambientIntensity" type="range" min="0" max="100" step="10" value="50" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <div class="form-check">
+                    <label for="sun">
+                        Sun Point Light
+                    </label>
+                    <br />
+                    <div>
+                        <small>Intensity</small>
+                        <input id="sunIntensity" type="range" min="0" max="100" step="10" value="50" />
+                    </div>
+                    <label for="sunTime">Time of Day:</label>
+                    <input type="time" id="sunTime" name="sunTime">
+                </div>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <div class="form-check">
+                    <label for="sun">
+                        Fog
+                    </label>
+                    <br />
+                    <div>
+                        <small>Intensity</small>
+                        <input id="fogIntensity" type="range" min="0" max="100" step="10" value="50" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <div class="form-check">
+                    <label for="projection">
+                        Projection properties
+                    </label>
+                    <div class="row">
+                        <small>Angle (45 - 135 degrees)</small>
+                        <input id="perspectiveAngle" type="range" min="45" max="135" step="5" value="90" />
+                    </div>
+                    <div class="row">
+                        <small>Near (0 - 10)</small>
+                        <input id="perspectiveNear" type="range" min="0" max="10" step="1" value="2" />
+                    </div>
+                    <div class="row">
+                        <small>Far (20 - 100)</small>
+                        <input id="perspectiveFar" type="range" min="20" max="100" step="1" value="2" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <h3>Object Modifications</h3>
+        </div>
+        <div class="row">
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <label for="object">Choose an object:</label>
+                <br />
+                <select name="object" id="cars">
+                    <option value="kitty">Kitty</option>
+                    <option value="pumpkin">Pumpkin</option>
+                    <option value="puppy">Puppy</option>
+                    <option value="rock">Rock</option>
+                </select>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <div class="form-check">
+                    <label for="render">
+                        Render Object
+                    </label>
+                    <br />
+                    <input class="form-check-input" type="checkbox" value="" id="render">
+                </div>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <label for="render">
+                    Rotation
+                </label>
+                <div class="row">
+                    <small>(About X-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="up">Up</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="down">Down</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <small>(About Y-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="left">Left</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="right">Right</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <small>(About Z-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="counterclockwise">Counterclockwise</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="clockwise">Clockwise</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <label for="translation">
+                    Translation
+                </label>
+                <div class="row">
+                    <small>(X-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="xMinus">-</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="xPlus">+</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <small>(Y-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="yMinus">-</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="yPlus">+</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <small>(About Z-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="zMinus">-</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button id="zPlus">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <!-- obj shaders -->
-        <!-- TODO: complete the shaders -->
-        <script id="kitty-vertex-shader" type="x-shader/x-vertex">
+    <!-- obj shaders -->
+    <!-- TODO: complete the shaders -->
+    <script id="kitty-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
 
@@ -50,7 +209,7 @@
                 gl_Position =  translation * rotation * scale * vPosition;
             }
         </script>
-        <script id="kitty-fragment-shader" type="x-shader/x-fragment">
+    <script id="kitty-fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
 
             // texture vars
@@ -63,10 +222,7 @@
             }
         </script>
 
-        <script
-            id="pumpkin-vertex-shader"
-            type="x-shader/x-fragment"
-        >
+    <script id="pumpkin-vertex-shader" type="x-shader/x-fragment">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
 
@@ -89,7 +245,7 @@
             }
         </script>
 
-        <script id="pumpkin-fragment-shader" type="x-shader/x-fragment">
+    <script id="pumpkin-fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
 
             // texture vars
@@ -102,7 +258,7 @@
             }
         </script>
 
-        <script id="puppy-vertex-shader" type="x-shader/x-vertex">
+    <script id="puppy-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
 
@@ -125,7 +281,7 @@
             }
         </script>
 
-        <script id="puppy-fragment-shader" type="x-shader/x-fragment">
+    <script id="puppy-fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
 
             // texture vars
@@ -138,7 +294,7 @@
             }
         </script>
 
-        <script id="rock-vertex-shader" type="x-shader/x-vertex">
+    <script id="rock-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
 
@@ -161,7 +317,7 @@
             }
         </script>
 
-        <script id="rock-fragment-shader" type="x-shader/x-fragment">
+    <script id="rock-fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
 
             // texture vars
@@ -174,29 +330,40 @@
             }
         </script>
 
-        <!-- required scripts -->
-        <script type="text/javascript" src="../Common/webgl-utils.js"></script>
-        <script type="text/javascript" src="../Common/initShaders.js"></script>
-        <script type="text/javascript" src="../Common/MV.js"></script>
-        <script type="text/javascript" src="objLoader.js"></script>
-        <script type="text/javascript" src="project.js"></script>
+    <!-- required scripts -->
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="objLoader.js"></script>
+    <script type="text/javascript" src="project.js"></script>
 
-        <!-- texture images -->
-        <img alt="kittyTexture" id="kittyTexture" src="./objs/kitty/color.jpg" hidden></img>
-        <img alt="kittyNormal" id="kittyNormal" src="./objs/kitty/normal.jpg" hidden></img>
+    <!-- Bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 
-        <img alt="pumpkinTexture" id="pumpkinTexture" src="./objs/pumpkin/pumpkin_color.jpg" hidden></img>
-        <img alt="pumpkinBump" id="pumpkinBump" src="./objs/pumpkin/pumpkin_bump.jpg" hidden></img>
-        <img alt="stalkTexture" id="stalkTexture" src="./objs/pumpkin/stalk_color.jpg" hidden></img>
-        <img alt="stalkBump" id="stalkBump" src="./objs/pumpkin/stalk_bump.jpg" hidden></img>
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-        <img alt="puppyTexture" id="puppyTexture" src="./objs/puppy/color.jpg" hidden></img>
-        <img alt="puppyNormal" id="puppyNormal" src="./objs/puppy/normal.jpg" hidden></img>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-        <img alt="rockTexture" id="rockTexture" src="./objs/rock/color.jpg" hidden></img>
-        <img alt="rockNormal" id="rockNormal" src="./objs/rock/normal.jpg" hidden></img>
-        <img alt="rockGlossiness" id="rockGlossiness" src="./objs/rock/glossiness.jpg" hidden></img>
-        <img alt="rockOcclusion" id="rockOcclusion" src="./objs/rock/occlusion.jpg" hidden></img>
-        <img alt="rockSpecular" id="rockSpecular" src="./objs/rock/specular.jpg" hidden></img>
-    </body>
+    <!-- texture images -->
+    <img alt="kittyTexture" id="kittyTexture" src="./objs/kitty/color.jpg" hidden></img>
+    <img alt="kittyNormal" id="kittyNormal" src="./objs/kitty/normal.jpg" hidden></img>
+
+    <img alt="pumpkinTexture" id="pumpkinTexture" src="./objs/pumpkin/pumpkin_color.jpg" hidden></img>
+    <img alt="pumpkinBump" id="pumpkinBump" src="./objs/pumpkin/pumpkin_bump.jpg" hidden></img>
+    <img alt="stalkTexture" id="stalkTexture" src="./objs/pumpkin/stalk_color.jpg" hidden></img>
+    <img alt="stalkBump" id="stalkBump" src="./objs/pumpkin/stalk_bump.jpg" hidden></img>
+
+    <img alt="puppyTexture" id="puppyTexture" src="./objs/puppy/color.jpg" hidden></img>
+    <img alt="puppyNormal" id="puppyNormal" src="./objs/puppy/normal.jpg" hidden></img>
+
+    <img alt="rockTexture" id="rockTexture" src="./objs/rock/color.jpg" hidden></img>
+    <img alt="rockNormal" id="rockNormal" src="./objs/rock/normal.jpg" hidden></img>
+    <img alt="rockGlossiness" id="rockGlossiness" src="./objs/rock/glossiness.jpg" hidden></img>
+    <img alt="rockOcclusion" id="rockOcclusion" src="./objs/rock/occlusion.jpg" hidden></img>
+    <img alt="rockSpecular" id="rockSpecular" src="./objs/rock/specular.jpg" hidden></img>
+</body>
+
 </html>
