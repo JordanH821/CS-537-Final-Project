@@ -4,9 +4,9 @@ var canvas;
 var gl;
 var aspect;
 var modelViewMatrix = lookAt(
-    vec3(0.0, 0.0, 0.0),
-    vec3(0, 0, -10),
-    vec3(0, 1, 0)
+    vec3(0.0, 0.0, 1) /* */,
+    vec3(0, 0, 0) /* looking at */,
+    vec3(0, 1, 0) /* up */
 );
 var projectionMatrix = perspective(90.0, aspect, 0.2, 100);
 
@@ -15,15 +15,23 @@ let objectList = [];
 
 let kitty = {
     objPath: './objs/kitty/kitty.obj',
+    textureHtmlId: 'kittyTexture',
     vertexShader: 'kitty-vertex-shader',
     fragmentShader: 'kitty-fragment-shader',
+    scale: scalem(0.01, 0.01, 0.01),
+    translation: translate(0.25, 0.25, 0),
+    rotation: rotate(180, 0, 1, 0),
 };
 objectList.push(kitty);
 
 let puppy = {
     objPath: './objs/puppy/Puppy.obj',
+    textureHtmlId: 'puppyTexture',
     vertexShader: 'puppy-vertex-shader',
     fragmentShader: 'puppy-fragment-shader',
+    scale: scalem(0.01, 0.01, 0.01),
+    translation: translate(-0.25, 0.25, 0),
+    rotation: rotate(180, 0, 1, 0),
 };
 objectList.push(puppy);
 
@@ -62,6 +70,7 @@ function getOrderedTextureCoordsFromObj(o) {
 
 function loadedObj(data) {
     let obj = loadOBJFromBuffer(data);
+    console.log(obj);
     let jsObj = objectList[currentObject];
     jsObj['indices'] = obj.i_verts;
     jsObj['vertices'] = obj.c_verts;
@@ -74,6 +83,30 @@ function loadedObj(data) {
     } else {
         setupAfterDataLoad();
     }
+}
+
+function configureTextures(obj) {
+    obj['texture'] = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    obj['textureImage'] = document.getElementById(obj['textureHtmlId']);
+    console.log(obj['textureHtmlId']);
+    console.log(obj['textureImage']);
+    gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGB,
+        gl.RGB,
+        gl.UNSIGNED_BYTE,
+        obj['textureImage']
+    );
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(
+        gl.TEXTURE_2D,
+        gl.TEXTURE_MIN_FILTER,
+        gl.NEAREST_MIPMAP_LINEAR
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 }
 
 function setupObjectShaderBuffers(obj) {
@@ -101,6 +134,15 @@ function setupObjectShaderBuffers(obj) {
         gl.STATIC_DRAW
     );
 
+    // texture buffer
+    obj['textureBuffer'] = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['textureBuffer']);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(obj['texCoords']),
+        gl.STATIC_DRAW
+    );
+
     // model view matrix location
     obj['modelViewMatrixLoc'] = gl.getUniformLocation(
         obj['shader'],
@@ -113,8 +155,20 @@ function setupObjectShaderBuffers(obj) {
         'projectionMatrix'
     );
 
+    // scale matrix
+    obj['scaleLoc'] = gl.getUniformLocation(obj['shader'], 'scale');
+
+    // translation matrix
+    obj['translationLoc'] = gl.getUniformLocation(obj['shader'], 'translation');
+
+    // rotation matrix
+    obj['rotationLoc'] = gl.getUniformLocation(obj['shader'], 'rotation');
+
     // vertex position
     obj['vPosition'] = gl.getAttribLocation(obj['shader'], 'vPosition');
+
+    // texture coord
+    obj['tPosition'] = gl.getAttribLocation(obj['shader'], 'tPosition');
 }
 
 function renderObject(obj) {
@@ -126,17 +180,42 @@ function renderObject(obj) {
     gl.vertexAttribPointer(obj['vPosition'], 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(obj['vPosition']);
 
+    // pass texture coords
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['textureBuffer']);
+    gl.vertexAttribPointer(obj['tPosition'], 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(obj['tPosition']);
+
     // pass camera matrices
     gl.uniformMatrix4fv(
         obj['modelViewMatrixLoc'],
         false,
         flatten(modelViewMatrix)
     );
+
     gl.uniformMatrix4fv(
         obj['projectionMatrixLoc'],
         false,
         flatten(projectionMatrix)
     );
+
+    // pass scale
+    gl.uniformMatrix4fv(obj['scaleLoc'], false, flatten(obj['scale']));
+
+    // pass translation
+    gl.uniformMatrix4fv(
+        obj['translationLoc'],
+        false,
+        flatten(obj['translation'])
+    );
+
+    // pass rotation
+    gl.uniformMatrix4fv(obj['rotationLoc'], false, flatten(obj['rotation']));
+
+    // pass default texture
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
+    gl.uniform1i(gl.getUniformLocation(obj['shader'], 'defaultTex'), 0);
+
     gl.drawElements(gl.TRIANGLES, obj['numVerts'], gl.UNSIGNED_SHORT, 0);
 }
 
@@ -144,6 +223,7 @@ function setupAfterDataLoad() {
     gl.enable(gl.DEPTH_TEST);
     for (const obj of objectList) {
         setupObjectShaderBuffers(obj);
+        configureTextures(obj);
     }
     render();
 }
