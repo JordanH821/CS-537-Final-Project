@@ -8,76 +8,76 @@ var modelViewMatrix = lookAt(
     vec3(0, 0, 0) /* looking at */,
     vec3(0, 1, 0) /* up */
 );
-
-var textureObjs = []
-var textures = {}
-
-
 var projectionMatrix = perspective(90.0, aspect, 0.2, 100);
 
 let currentObject = 0;
 let objectList = [];
 
-var boxImage;
-var boxTexture;
-
 let kitty = {
     objPath: './objs/kitty/kitty.obj',
+    textureHtmlId: 'kittyTexture',
     vertexShader: 'kitty-vertex-shader',
     fragmentShader: 'kitty-fragment-shader',
     scale: scalem(0.01, 0.01, 0.01),
     translation: translate(0.25, 0.25, 0),
+    rotation: rotate(180, 0, 1, 0),
 };
-//objectList.push(kitty);
+objectList.push(kitty);
 
 let puppy = {
     objPath: './objs/puppy/Puppy.obj',
+    textureHtmlId: 'puppyTexture',
     vertexShader: 'puppy-vertex-shader',
     fragmentShader: 'puppy-fragment-shader',
     scale: scalem(0.01, 0.01, 0.01),
     translation: translate(-0.25, 0.25, 0),
+    rotation: rotate(180, 0, 1, 0),
 };
-//objectList.push(puppy);
+objectList.push(puppy);
+
+let pumpkin = {
+    objPath: './objs/pumpkin/pumpkin.obj',
+    textureHtmlId: 'pumpkinTexture',
+    vertexShader: 'pumpkin-vertex-shader',
+    fragmentShader: 'pumpkin-fragment-shader',
+    scale: scalem(0.001, 0.001, 0.001),
+    translation: translate(-0.5, 0.25, 0),
+    rotation: rotate(180, 0, 1, 0),
+};
+objectList.push(pumpkin);
+
+let rock = {
+    objPath: './objs/rock/rock.obj',
+    textureHtmlId: 'rockTexture',
+    vertexShader: 'pumpkin-vertex-shader',
+    fragmentShader: 'pumpkin-fragment-shader',
+    scale: scalem(0.01, 0.01, 0.01),
+    translation: translate(-0.25, 0.0, 0),
+    rotation: rotate(180, 0, 1, 0),
+};
+objectList.push(rock);
 
 let pizza = {
     objPath: './objs/pizza/pizza.obj',
-    vertexShader: 'vaccine-vertex-shader',
-    fragmentShader: 'vaccine-fragment-shader',
+    textureHtmlId: 'pizzaTexture',
+    vertexShader: 'pizza-vertex-shader',
+    fragmentShader: 'pizza-fragment-shader',
     scale: scalem (1 ,1 ,1),
-    translation: translate(-.75, .25, 0)
+    translation: translate(-.75, .25, 0),
+   rotation: rotate(90, 90, 90, 90)
 };
 objectList.push(pizza);
 
 let wooden_crate = {
     objPath: './objs/box/wooden crate.obj',
+    textureHtmlId: 'woodenCrateTexture',
     vertexShader: 'wooden_crate-vertex-shader',
     fragmentShader: 'wooden_crate-fragment-shader',
     scale: scalem(.25, .25, .25),
     translation: translate(.8, .25, 0),
+    rotation: rotate(180, 0, 1, 0)
 };
 objectList.push(wooden_crate);
-
-let bunny = {
-    objPath: './objs/bunny/bunny.obj',
-    vertexShader: 'bunny-vertex-shader',
-    fragmentShader: 'bunny-fragment-shader',
-    scale: scalem(2, 2, 2),
-    translation: mat4(),
-};
-//objectList.push(bunny);
-
-function configureTexture( image ) {
-    var texture = gl.createTexture();
-    gl.bindTexture( gl.TEXTURE_2D, texture );
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, 
-         gl.RGB, gl.UNSIGNED_BYTE, image );
-    gl.generateMipmap( gl.TEXTURE_2D );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, 
-                      gl.NEAREST_MIPMAP_LINEAR );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
-    return texture;
-}
 
 
 function getOrderedNormalsFromObj(o) {
@@ -130,10 +130,31 @@ function loadedObj(data) {
     }
 }
 
+function configureTextures(obj) {
+    obj['texture'] = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    obj['textureImage'] = document.getElementById(obj['textureHtmlId']);
+    console.log(obj['textureHtmlId']);
+    console.log(obj['textureImage']);
+    gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGB,
+        gl.RGB,
+        gl.UNSIGNED_BYTE,
+        obj['textureImage']
+    );
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(
+        gl.TEXTURE_2D,
+        gl.TEXTURE_MIN_FILTER,
+        gl.NEAREST_MIPMAP_LINEAR
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+}
 
-function setupObjectShaderBuffers(obj, i) {
-
-    console.log(obj)
+function setupObjectShaderBuffers(obj) {
     // init shaders
     obj['shader'] = initShaders(gl, obj['vertexShader'], obj['fragmentShader']);
 
@@ -149,16 +170,21 @@ function setupObjectShaderBuffers(obj, i) {
         gl.STATIC_DRAW
     );
 
-    obj['textureBuffer'] = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, obj['textureBuffer']);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(obj['texCoords']), gl.STATIC_DRAW);
-
     // vertex buffer
     obj['vertexBuffer'] = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, obj['vertexBuffer']);
     gl.bufferData(
         gl.ARRAY_BUFFER,
         new Float32Array(obj['vertices']),
+        gl.STATIC_DRAW
+    );
+
+    // texture buffer
+    obj['textureBuffer'] = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['textureBuffer']);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(obj['texCoords']),
         gl.STATIC_DRAW
     );
 
@@ -180,16 +206,17 @@ function setupObjectShaderBuffers(obj, i) {
     // translation matrix
     obj['translationLoc'] = gl.getUniformLocation(obj['shader'], 'translation');
 
+    // rotation matrix
+    obj['rotationLoc'] = gl.getUniformLocation(obj['shader'], 'rotation');
+
     // vertex position
     obj['vPosition'] = gl.getAttribLocation(obj['shader'], 'vPosition');
 
-    obj['vTexCoord'] = gl.getAttribLocation(obj['shader'], "vTexCoord");
-    gl.vertexAttribPointer(obj['vTexCoord'], 2, gl.FLOAT, false, 0, 0)
-    gl.enableVertexAttribArray(obj['vTexCoord']);
+    // texture coord
+    obj['tPosition'] = gl.getAttribLocation(obj['shader'], 'tPosition');
 }
 
-
-function renderObject(obj, i) {
+function renderObject(obj) {
     gl.useProgram(obj['shader']);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj['indexBuffer']);
 
@@ -197,6 +224,11 @@ function renderObject(obj, i) {
     gl.bindBuffer(gl.ARRAY_BUFFER, obj['vertexBuffer']);
     gl.vertexAttribPointer(obj['vPosition'], 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(obj['vPosition']);
+
+    // pass texture coords
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['textureBuffer']);
+    gl.vertexAttribPointer(obj['tPosition'], 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(obj['tPosition']);
 
     // pass camera matrices
     gl.uniformMatrix4fv(
@@ -221,38 +253,30 @@ function renderObject(obj, i) {
         flatten(obj['translation'])
     );
 
-    gl.bindTexture(gl.TEXTURE_2D, textureObjs[i-1]);
+    // pass rotation
+    gl.uniformMatrix4fv(obj['rotationLoc'], false, flatten(obj['rotation']));
 
-    obj['texLoc'] = gl.getUniformLocation( obj['shader'], "texture" );
-    gl.uniform1i(obj['texLoc'], 0);
-
+    // pass default texture
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
+    gl.uniform1i(gl.getUniformLocation(obj['shader'], 'defaultTex'), 0);
 
     gl.drawElements(gl.TRIANGLES, obj['numVerts'], gl.UNSIGNED_SHORT, 0);
 }
 
-
-
 function setupAfterDataLoad() {
     gl.enable(gl.DEPTH_TEST);
-
-    var i = 1;
     for (const obj of objectList) {
-        console.log(document.getElementById("texture_" + i))
-        textureObjs.push(configureTexture(document.getElementById("texture_" + i)));
-        setupObjectShaderBuffers(obj, i);
-        i++;
+        setupObjectShaderBuffers(obj);
+        configureTextures(obj);
     }
-
     render();
 }
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
-    var i = 1;
     for (const obj of objectList) {
-        renderObject(obj, i);
-        i++;
+        renderObject(obj);
     }
     requestAnimationFrame(render);
 }
@@ -261,7 +285,6 @@ window.onload = function init() {
     canvas = document.getElementById('gl-canvas');
 
     gl = WebGLUtils.setupWebGL(canvas);
-
     if (!gl) {
         alert("WebGL isn't available");
     }
