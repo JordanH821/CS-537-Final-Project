@@ -241,7 +241,7 @@
             void main()
             {
                 fTexCoord = tPosition;
-                gl_Position = translation * rotation * scale * vPosition;
+                gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
 
@@ -290,7 +290,7 @@
 
             void main()
             {
-                gl_FragColor =  texture2D( defaultTex, fTexCoord );
+                gl_FragColor = texture2D( defaultTex, fTexCoord );
             }
         </script>
 
@@ -313,7 +313,7 @@
             void main()
             {
                 fTexCoord = tPosition;
-                gl_Position = translation * rotation * scale * vPosition;
+                gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
 
@@ -350,7 +350,7 @@
         void main()
         {
             fTexCoord = tPosition;
-            gl_Position = translation * rotation * scale * vPosition;
+            gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
         }
     </script>
     <script id="pizza-fragment-shader" type="x-shader/x-fragment">
@@ -385,7 +385,7 @@
         void main()
         {
             fTexCoord = tPosition;
-            gl_Position = translation * rotation * scale * vPosition;
+            gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
         }
     </script>
     <script id="wooden_crate-fragment-shader" type="x-shader/x-fragment">
