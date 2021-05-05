@@ -23,7 +23,10 @@ let kitty = {
     vertexShader: 'kitty-vertex-shader',
     fragmentShader: 'kitty-fragment-shader',
     scale: scalem(0.01, 0.01, 0.01),
-    translation: translate(0.25, 0.25, 0),
+    translationVector: vec3(0.25, 0.25, 0),
+    get translation() {
+        return translate(...this.translationVector);
+    },
     rotateX: vec4(0, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
@@ -40,7 +43,10 @@ let puppy = {
     vertexShader: 'puppy-vertex-shader',
     fragmentShader: 'puppy-fragment-shader',
     scale: scalem(0.01, 0.01, 0.01),
-    translation: translate(-0.25, 0.25, 0),
+    translationVector: vec3(-0.25, 0.25, 0),
+    get translation() {
+        return translate(...this.translationVector);
+    },
     rotateX: vec4(0, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
@@ -57,7 +63,10 @@ let pumpkin = {
     vertexShader: 'pumpkin-vertex-shader',
     fragmentShader: 'pumpkin-fragment-shader',
     scale: scalem(0.003, 0.003, 0.003),
-    translation: translate(0.0, 0.25, 0),
+    translationVector: vec3(0.0, 0.25, 0),
+    get translation() {
+        return translate(...this.translationVector);
+    },
     rotateX: vec4(0, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
@@ -74,7 +83,10 @@ let rock = {
     vertexShader: 'pumpkin-vertex-shader',
     fragmentShader: 'pumpkin-fragment-shader',
     scale: scalem(0.02, 0.02, 0.02),
-    translation: translate(-0.25, -0.5, 0),
+    translationVector: vec3(-0.25, -0.5, 0),
+    get translation() {
+        return translate(...this.translationVector);
+    },
     rotateX: vec4(0, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
@@ -91,7 +103,10 @@ let pizza = {
     vertexShader: 'pizza-vertex-shader',
     fragmentShader: 'pizza-fragment-shader',
     scale: scalem(1, 1, 1),
-    translation: translate(-0.75, 0.25, 0),
+    translationVector: vec3(-0.75, 0.25, 0),
+    get translation() {
+        return translate(...this.translationVector);
+    },
     rotateX: vec4(90, 1, 0, 0),
     rotateY: vec4(0, 0, 1, 0),
     rotateZ: vec4(180, 0, 0, 1),
@@ -108,7 +123,10 @@ let wooden_crate = {
     vertexShader: 'wooden_crate-vertex-shader',
     fragmentShader: 'wooden_crate-fragment-shader',
     scale: scalem(0.25, 0.25, 0.25),
-    translation: translate(0.65, -0.25, 0),
+    translationVector: vec3(0.65, -0.25, 0),
+    get translation() {
+        return translate(...this.translationVector);
+    },
     rotateX: vec4(0, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
@@ -155,7 +173,6 @@ function getOrderedTextureCoordsFromObj(o) {
 function loadedObj(data) {
     const objectList = Object.values(objects);
     let obj = loadOBJFromBuffer(data);
-    console.log(obj);
     let jsObj = objectList[currentObject];
     jsObj['indices'] = obj.i_verts;
     jsObj['vertices'] = obj.c_verts;
@@ -175,8 +192,6 @@ function configureTextures(obj) {
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     obj['textureImage'] = document.getElementById(obj['textureHtmlId']);
-    console.log(obj['textureHtmlId']);
-    console.log(obj['textureImage']);
     gl.texImage2D(
         gl.TEXTURE_2D,
         0,
@@ -316,7 +331,6 @@ function setupAfterDataLoad() {
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     for (const obj of Object.values(objects)) {
-        console.log(obj['isRendering']);
         if (obj['isRendering']) renderObject(obj);
     }
     requestAnimationFrame(render);
@@ -357,6 +371,32 @@ function setupOnClickListeners() {
             case 'clockwise':
                 return (object.rotateZ[0] = rotate(object.rotateZ[0]));
         }
+    });
+
+    $('.translation').on('click', (e) => {
+        const direction = e.target.id;
+        const object = getSelectedObject();
+        const delta = 0.1;
+        const translate = (v) => {
+            return direction.includes('Plus') ? v + delta : v - delta;
+        };
+        const getDimension = () => {
+            switch (direction) {
+                case 'xPlus':
+                case 'xMinus':
+                    return 0;
+                case 'yPlus':
+                case 'yMinus':
+                    return 1;
+                case 'zPlus':
+                case 'zMinus':
+                    return 2;
+            }
+        };
+        const dimension = getDimension();
+        object.translationVector[dimension] = translate(
+            object.translationVector[dimension]
+        );
     });
 }
 
