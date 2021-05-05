@@ -13,6 +13,10 @@ var projectionMatrix = perspective(135.0, aspect, 0.2, 10);
 let currentObject = 0;
 let objects = {};
 
+function getCombinedRotation(x, y, z) {
+    return mult(rotate(...x), mult(rotate(...y), rotate(...z)));
+}
+
 let kitty = {
     objPath: './objs/kitty/kitty.obj',
     textureHtmlId: 'kittyTexture',
@@ -20,7 +24,12 @@ let kitty = {
     fragmentShader: 'kitty-fragment-shader',
     scale: scalem(0.01, 0.01, 0.01),
     translation: translate(0.25, 0.25, 0),
-    rotation: rotate(180, 0, 1, 0),
+    rotateX: vec4(0, 1, 0, 0),
+    rotateY: vec4(180, 0, 1, 0),
+    rotateZ: vec4(0, 0, 0, 1),
+    get rotation() {
+        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
+    },
     isRendering: true,
 };
 objects['kitty'] = kitty;
@@ -32,7 +41,12 @@ let puppy = {
     fragmentShader: 'puppy-fragment-shader',
     scale: scalem(0.01, 0.01, 0.01),
     translation: translate(-0.25, 0.25, 0),
-    rotation: rotate(180, 0, 1, 0),
+    rotateX: vec4(0, 1, 0, 0),
+    rotateY: vec4(180, 0, 1, 0),
+    rotateZ: vec4(0, 0, 0, 1),
+    get rotation() {
+        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
+    },
     isRendering: true,
 };
 objects['puppy'] = puppy;
@@ -44,7 +58,12 @@ let pumpkin = {
     fragmentShader: 'pumpkin-fragment-shader',
     scale: scalem(0.003, 0.003, 0.003),
     translation: translate(0.0, 0.25, 0),
-    rotation: rotate(180, 0, 1, 0),
+    rotateX: vec4(0, 1, 0, 0),
+    rotateY: vec4(180, 0, 1, 0),
+    rotateZ: vec4(0, 0, 0, 1),
+    get rotation() {
+        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
+    },
     isRendering: true,
 };
 objects['pumpkin'] = pumpkin;
@@ -56,7 +75,12 @@ let rock = {
     fragmentShader: 'pumpkin-fragment-shader',
     scale: scalem(0.02, 0.02, 0.02),
     translation: translate(-0.25, -0.5, 0),
-    rotation: rotate(180, 0, 1, 0),
+    rotateX: vec4(0, 1, 0, 0),
+    rotateY: vec4(180, 0, 1, 0),
+    rotateZ: vec4(0, 0, 0, 1),
+    get rotation() {
+        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
+    },
     isRendering: true,
 };
 objects['rock'] = rock;
@@ -68,7 +92,12 @@ let pizza = {
     fragmentShader: 'pizza-fragment-shader',
     scale: scalem(1, 1, 1),
     translation: translate(-0.75, 0.25, 0),
-    rotation: rotate(90, 90, 90, 90),
+    rotateX: vec4(90, 1, 0, 0),
+    rotateY: vec4(0, 0, 1, 0),
+    rotateZ: vec4(180, 0, 0, 1),
+    get rotation() {
+        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
+    },
     isRendering: true,
 };
 objects['pizza'] = pizza;
@@ -80,7 +109,12 @@ let wooden_crate = {
     fragmentShader: 'wooden_crate-fragment-shader',
     scale: scalem(0.25, 0.25, 0.25),
     translation: translate(0.65, -0.25, 0),
-    rotation: rotate(180, 0, 1, 0),
+    rotateX: vec4(0, 1, 0, 0),
+    rotateY: vec4(180, 0, 1, 0),
+    rotateZ: vec4(0, 0, 0, 1),
+    get rotation() {
+        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
+    },
     isRendering: true,
 };
 objects['wooden_crate'] = wooden_crate;
@@ -289,14 +323,40 @@ function render() {
 }
 
 function setupOnClickListeners() {
-    $('#objectSelect').on('change', (e) => {
+    function getSelectedObject() {
         const objectKey = $('#objectSelect option:selected')[0].value;
-        $('#render').prop('checked', objects[objectKey].isRendering);
+        return objects[objectKey];
+    }
+
+    $('#objectSelect').on('change', () => {
+        $('#render').prop('checked', getSelectedObject().isRendering);
     });
 
-    $('#render').on('click', (e) => {
-        const objectKey = $('#objectSelect option:selected')[0].value;
-        objects[objectKey].isRendering = !objects[objectKey].isRendering;
+    $('#render').on('click', () => {
+        const obj = getSelectedObject();
+        obj.isRendering = !obj.isRendering;
+    });
+
+    $('.rotation').on('click', (e) => {
+        const direction = e.target.id;
+        const object = getSelectedObject();
+        const angle = 10;
+        const rotate = (a) => {
+            return ['up', 'left', 'clockwise'].includes(direction)
+                ? a + (angle % 360)
+                : a - (angle % 360);
+        };
+        switch (direction) {
+            case 'up':
+            case 'down':
+                return (object.rotateX[0] = rotate(object.rotateX[0]));
+            case 'right':
+            case 'left':
+                return (object.rotateY[0] = rotate(object.rotateY[0]));
+            case 'counterclockwise':
+            case 'clockwise':
+                return (object.rotateZ[0] = rotate(object.rotateZ[0]));
+        }
     });
 }
 
