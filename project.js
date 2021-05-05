@@ -2,16 +2,16 @@
 
 var canvas;
 var gl;
-var aspect;
+var aspect = 1;
 var modelViewMatrix = lookAt(
-    vec3(0.0, 0.0, 1) /* */,
+    vec3(0.0, 0.0, -1) /* eye */,
     vec3(0, 0, 0) /* looking at */,
     vec3(0, 1, 0) /* up */
 );
-var projectionMatrix = perspective(90.0, aspect, 0.2, 100);
+var projectionMatrix = perspective(135.0, aspect, 0.2, 10);
 
 let currentObject = 0;
-let objectList = [];
+let objects = {};
 
 let kitty = {
     objPath: './objs/kitty/kitty.obj',
@@ -21,8 +21,9 @@ let kitty = {
     scale: scalem(0.01, 0.01, 0.01),
     translation: translate(0.25, 0.25, 0),
     rotation: rotate(180, 0, 1, 0),
+    isRendering: true,
 };
-objectList.push(kitty);
+objects['kitty'] = kitty;
 
 let puppy = {
     objPath: './objs/puppy/Puppy.obj',
@@ -32,30 +33,33 @@ let puppy = {
     scale: scalem(0.01, 0.01, 0.01),
     translation: translate(-0.25, 0.25, 0),
     rotation: rotate(180, 0, 1, 0),
+    isRendering: true,
 };
-objectList.push(puppy);
+objects['puppy'] = puppy;
 
 let pumpkin = {
     objPath: './objs/pumpkin/pumpkin.obj',
     textureHtmlId: 'pumpkinTexture',
     vertexShader: 'pumpkin-vertex-shader',
     fragmentShader: 'pumpkin-fragment-shader',
-    scale: scalem(0.001, 0.001, 0.001),
-    translation: translate(-0.5, 0.25, 0),
+    scale: scalem(0.003, 0.003, 0.003),
+    translation: translate(0.0, 0.25, 0),
     rotation: rotate(180, 0, 1, 0),
+    isRendering: true,
 };
-objectList.push(pumpkin);
+objects['pumpkin'] = pumpkin;
 
 let rock = {
     objPath: './objs/rock/rock.obj',
     textureHtmlId: 'rockTexture',
     vertexShader: 'pumpkin-vertex-shader',
     fragmentShader: 'pumpkin-fragment-shader',
-    scale: scalem(0.01, 0.01, 0.01),
-    translation: translate(-0.25, 0.0, 0),
+    scale: scalem(0.02, 0.02, 0.02),
+    translation: translate(-0.25, -0.5, 0),
     rotation: rotate(180, 0, 1, 0),
+    isRendering: true,
 };
-objectList.push(rock);
+objects['rock'] = rock;
 
 let pizza = {
     objPath: './objs/pizza/pizza.obj',
@@ -65,8 +69,9 @@ let pizza = {
     scale: scalem(1, 1, 1),
     translation: translate(-0.75, 0.25, 0),
     rotation: rotate(90, 90, 90, 90),
+    isRendering: true,
 };
-objectList.push(pizza);
+objects['pizza'] = pizza;
 
 let wooden_crate = {
     objPath: './objs/box/wooden crate.obj',
@@ -74,10 +79,11 @@ let wooden_crate = {
     vertexShader: 'wooden_crate-vertex-shader',
     fragmentShader: 'wooden_crate-fragment-shader',
     scale: scalem(0.25, 0.25, 0.25),
-    translation: translate(0.8, 0.25, 0),
+    translation: translate(0.65, -0.25, 0),
     rotation: rotate(180, 0, 1, 0),
+    isRendering: true,
 };
-objectList.push(wooden_crate);
+objects['wooden_crate'] = wooden_crate;
 
 function getOrderedNormalsFromObj(o) {
     var normalsOrderedWithVertices = new Array(o.c_verts.length);
@@ -113,6 +119,7 @@ function getOrderedTextureCoordsFromObj(o) {
 }
 
 function loadedObj(data) {
+    const objectList = Object.values(objects);
     let obj = loadOBJFromBuffer(data);
     console.log(obj);
     let jsObj = objectList[currentObject];
@@ -265,7 +272,7 @@ function renderObject(obj) {
 
 function setupAfterDataLoad() {
     gl.enable(gl.DEPTH_TEST);
-    for (const obj of objectList) {
+    for (const obj of Object.values(objects)) {
         setupObjectShaderBuffers(obj);
         configureTextures(obj);
     }
@@ -274,10 +281,23 @@ function setupAfterDataLoad() {
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    for (const obj of objectList) {
-        renderObject(obj);
+    for (const obj of Object.values(objects)) {
+        console.log(obj['isRendering']);
+        if (obj['isRendering']) renderObject(obj);
     }
     requestAnimationFrame(render);
+}
+
+function setupOnClickListeners() {
+    $('#objectSelect').on('change', (e) => {
+        const objectKey = $('#objectSelect option:selected')[0].value;
+        $('#render').prop('checked', objects[objectKey].isRendering);
+    });
+
+    $('#render').on('click', (e) => {
+        const objectKey = $('#objectSelect option:selected')[0].value;
+        objects[objectKey].isRendering = !objects[objectKey].isRendering;
+    });
 }
 
 window.onload = function init() {
@@ -288,11 +308,14 @@ window.onload = function init() {
         alert("WebGL isn't available");
     }
 
-    // setup gl vars
+    // set up gl vars
     gl.viewport(0, 0, canvas.width, canvas.height);
     aspect = canvas.width / canvas.height;
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
 
+    // set up click listeners
+    setupOnClickListeners();
+
     // start loading objects
-    loadOBJFromPath(objectList[0]['objPath'], loadedObj);
+    loadOBJFromPath(Object.values(objects)[0]['objPath'], loadedObj);
 };
