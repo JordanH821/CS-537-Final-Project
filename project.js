@@ -12,9 +12,35 @@ var projectionMatrix = perspective(135.0, aspect, 0.2, 10);
 
 let currentObject = 0;
 let objects = {};
+let defaults = {};
 
 function getCombinedRotation(x, y, z) {
     return mult(rotate(...x), mult(rotate(...y), rotate(...z)));
+}
+
+const translationGetter = {
+    get: function () {
+        return translate(...this.translationVector);
+    },
+};
+
+const rotationGetter = {
+    get: function () {
+        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
+    },
+};
+
+function deepCopy(src) {
+    let copy = {};
+    for (const [key, val] of Object.entries(src)) {
+        if (
+            ['translationVector', 'rotateX', 'rotateY', 'rotateZ'].includes(key)
+        ) {
+            copy[key] = [...val];
+        }
+    }
+    copy['isRendering'] = true;
+    return copy;
 }
 
 let kitty = {
@@ -24,15 +50,9 @@ let kitty = {
     fragmentShader: 'kitty-fragment-shader',
     scale: scalem(0.01, 0.01, 0.01),
     translationVector: vec3(0.25, 0.25, 0),
-    get translation() {
-        return translate(...this.translationVector);
-    },
     rotateX: vec4(0, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
-    get rotation() {
-        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
-    },
     isRendering: true,
 };
 objects['kitty'] = kitty;
@@ -44,15 +64,9 @@ let puppy = {
     fragmentShader: 'puppy-fragment-shader',
     scale: scalem(0.01, 0.01, 0.01),
     translationVector: vec3(-0.25, 0.25, 0),
-    get translation() {
-        return translate(...this.translationVector);
-    },
     rotateX: vec4(0, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
-    get rotation() {
-        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
-    },
     isRendering: true,
 };
 objects['puppy'] = puppy;
@@ -64,15 +78,9 @@ let pumpkin = {
     fragmentShader: 'pumpkin-fragment-shader',
     scale: scalem(0.003, 0.003, 0.003),
     translationVector: vec3(0.0, 0.25, 0),
-    get translation() {
-        return translate(...this.translationVector);
-    },
     rotateX: vec4(0, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
-    get rotation() {
-        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
-    },
     isRendering: true,
 };
 objects['pumpkin'] = pumpkin;
@@ -84,15 +92,9 @@ let rock = {
     fragmentShader: 'pumpkin-fragment-shader',
     scale: scalem(0.02, 0.02, 0.02),
     translationVector: vec3(-0.25, -0.5, 0),
-    get translation() {
-        return translate(...this.translationVector);
-    },
     rotateX: vec4(0, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
-    get rotation() {
-        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
-    },
     isRendering: true,
 };
 objects['rock'] = rock;
@@ -104,15 +106,9 @@ let pizza = {
     fragmentShader: 'pizza-fragment-shader',
     scale: scalem(1, 1, 1),
     translationVector: vec3(-0.75, 0.25, 0),
-    get translation() {
-        return translate(...this.translationVector);
-    },
     rotateX: vec4(90, 1, 0, 0),
     rotateY: vec4(0, 0, 1, 0),
     rotateZ: vec4(180, 0, 0, 1),
-    get rotation() {
-        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
-    },
     isRendering: true,
 };
 objects['pizza'] = pizza;
@@ -124,18 +120,18 @@ let wooden_crate = {
     fragmentShader: 'wooden_crate-fragment-shader',
     scale: scalem(0.25, 0.25, 0.25),
     translationVector: vec3(0.65, -0.25, 0),
-    get translation() {
-        return translate(...this.translationVector);
-    },
     rotateX: vec4(0, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
-    get rotation() {
-        return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
-    },
     isRendering: true,
 };
 objects['wooden_crate'] = wooden_crate;
+
+for (const [name, obj] of Object.entries(objects)) {
+    Object.defineProperty(obj, 'translation', translationGetter);
+    Object.defineProperty(obj, 'rotation', rotationGetter);
+    defaults[name] = deepCopy(obj);
+}
 
 function getOrderedNormalsFromObj(o) {
     var normalsOrderedWithVertices = new Array(o.c_verts.length);
@@ -336,10 +332,17 @@ function render() {
     requestAnimationFrame(render);
 }
 
+function setDefaultHtmlValues() {
+    $('#render').prop('checked', true);
+}
+
 function setupOnClickListeners() {
+    function getObjectKey() {
+        return $('#objectSelect option:selected')[0].value;
+    }
+
     function getSelectedObject() {
-        const objectKey = $('#objectSelect option:selected')[0].value;
-        return objects[objectKey];
+        return objects[getObjectKey()];
     }
 
     $('#objectSelect').on('change', () => {
@@ -398,6 +401,16 @@ function setupOnClickListeners() {
             object.translationVector[dimension]
         );
     });
+
+    $('#restore').on('click', () => {
+        const objectKey = getObjectKey();
+        const defaultObject = defaults[objectKey];
+        const obj = objects[objectKey];
+        for (const [key, val] of Object.entries(defaultObject)) {
+            obj[key] = Array.isArray(val) ? [...val] : val;
+        }
+        $('#render').prop('checked', true);
+    });
 }
 
 window.onload = function init() {
@@ -412,6 +425,9 @@ window.onload = function init() {
     gl.viewport(0, 0, canvas.width, canvas.height);
     aspect = canvas.width / canvas.height;
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
+
+    // set default html values
+    setDefaultHtmlValues();
 
     // set up click listeners
     setupOnClickListeners();
