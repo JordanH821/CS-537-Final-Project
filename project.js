@@ -153,6 +153,36 @@ function configureTextures(obj) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 }
 
+function normalMap(obj) {
+    let bumpData = new Arrray();
+    let normals = newArray();
+
+    for (var i = 0; i <= obj['textureImage'].size(); ++i) {
+        bumpData[i] = new Array();
+
+        for (var j = 0; i <= obj['textureImage'].size(); ++j) {
+            bumpData[i][j] = 0;
+        }
+    }
+
+    for (var i = obj['textureImage'].size()/4; i < 3*obj['textureImage'].size()/4; ++i) {
+        for (var j = obj['textureImage'].size()/4; j < 3*obj['textureImage'].size()/4; ++j) {
+            bumpData[i][j] = 1.0;
+        }
+    }
+
+    for (var i = 0; i < obj['textureImage'].size(); ++i) {
+        normals[i] = new Array();
+
+        for (var j = 0; j < obj['textureImage'].size(); ++j) {
+            normals[i][j] = new Array();
+            normals[i][j][0] = bumpData[i][j]-bumpData[i+1][j];
+            normals[i][j][1] = bumpData[i][j]-bumpData[i][j+1];
+            normals[i][j][2] = 1;
+        }
+    }
+}
+
 function setupObjectShaderBuffers(obj) {
     // init shaders
     obj['shader'] = initShaders(gl, obj['vertexShader'], obj['fragmentShader']);

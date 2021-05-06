@@ -225,7 +225,7 @@
     <script id="pumpkin-vertex-shader" type="x-shader/x-fragment">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
-
+            uniform vec4 normal;
             // camera properties
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
@@ -235,12 +235,17 @@
             uniform mat4 translation;
             uniform mat4 rotation;
 
+            uniform mat3 normMatrix;
+
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
 
             void main()
             {
                 fTexCoord = tPosition;
+
+                vec3 norm = normalize(normMatrix * normal.xyz)
+
                 gl_Position = translation * rotation * scale * vPosition;
             }
         </script>
