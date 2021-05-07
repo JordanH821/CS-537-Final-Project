@@ -65,8 +65,8 @@
                     </label>
                     <br />
                     <div>
-                        <small>Intensity</small>
-                        <input id="fogIntensity" type="range" min="0" max="100" step="10" value="50" />
+                        <small>Intensity (0.0 - 1.0)</small>
+                        <input id="fogIntensity" type="range" min="0.0" max="1.0" step=".01" value="0" />
                     </div>
                 </div>
             </div>
@@ -192,7 +192,6 @@
     </div>
 
     <!-- obj shaders -->
-    <!-- TODO: complete the shaders -->
     <script id="kitty-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
@@ -206,13 +205,21 @@
             uniform mat4 translation;
             uniform mat4 rotation;
 
+            // fog properties
+            uniform vec4 fogColor;
+            uniform float fogIntensity;
+
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
                 // pass texture texture coord
                 fTexCoord = tPosition;
+                fFogColor = fogColor;
+                fFogIntensity = fogIntensity;
 
                 gl_Position =  translation * rotation * scale * vPosition;
             }
@@ -224,9 +231,13 @@
             varying vec2 fTexCoord;
             uniform sampler2D defaultTex;
 
+            // fog vars
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
+
             void main()
             {
-                gl_FragColor =  texture2D( defaultTex, fTexCoord );
+                gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
             }
         </script>
 
@@ -243,27 +254,41 @@
             uniform mat4 translation;
             uniform mat4 rotation;
 
+            // fog properties
+            uniform vec4 fogColor;
+            uniform float fogIntensity;
+
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
+                // pass texture texture coord
                 fTexCoord = tPosition;
+                fFogColor = fogColor;
+                fFogIntensity = fogIntensity;
+
                 gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
 
     <script id="pumpkin-fragment-shader" type="x-shader/x-fragment">
-            precision mediump float;
+        precision mediump float;
 
-            // texture vars
-            varying vec2 fTexCoord;
-            uniform sampler2D defaultTex;
+        // texture vars
+        varying vec2 fTexCoord;
+        uniform sampler2D defaultTex;
 
-            void main()
-            {
-                gl_FragColor =  texture2D( defaultTex, fTexCoord );
-            }
+        // fog vars
+        varying vec4 fFogColor;
+        varying float fFogIntensity;
+
+        void main()
+        {
+            gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+        }
         </script>
 
     <script id="puppy-vertex-shader" type="x-shader/x-vertex">
@@ -279,27 +304,41 @@
             uniform mat4 translation;
             uniform mat4 rotation;
 
+            // fog properties
+            uniform vec4 fogColor;
+            uniform float fogIntensity;
+
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
+                // pass texture texture coord
                 fTexCoord = tPosition;
+                fFogColor = fogColor;
+                fFogIntensity = fogIntensity;
+
                 gl_Position = translation * rotation * scale * vPosition;
             }
         </script>
 
     <script id="puppy-fragment-shader" type="x-shader/x-fragment">
-            precision mediump float;
+        precision mediump float;
 
-            // texture vars
-            varying vec2 fTexCoord;
-            uniform sampler2D defaultTex;
+        // texture vars
+        varying vec2 fTexCoord;
+        uniform sampler2D defaultTex;
 
-            void main()
-            {
-                gl_FragColor = texture2D( defaultTex, fTexCoord );
-            }
+        // fog vars
+        varying vec4 fFogColor;
+        varying float fFogIntensity;
+
+        void main()
+        {
+            gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+        }
         </script>
 
     <script id="rock-vertex-shader" type="x-shader/x-vertex">
@@ -315,27 +354,41 @@
             uniform mat4 translation;
             uniform mat4 rotation;
 
+            // fog properties
+            uniform vec4 fogColor;
+            uniform float fogIntensity;
+
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
+                // pass texture texture coord
                 fTexCoord = tPosition;
+                fFogColor = fogColor;
+                fFogIntensity = fogIntensity;
+
                 gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
 
     <script id="rock-fragment-shader" type="x-shader/x-fragment">
-            precision mediump float;
+        precision mediump float;
 
-            // texture vars
-            varying vec2 fTexCoord;
-            uniform sampler2D defaultTex;
+        // texture vars
+        varying vec2 fTexCoord;
+        uniform sampler2D defaultTex;
 
-            void main()
-            {
-                gl_FragColor =  texture2D( defaultTex, fTexCoord );
-            }
+        // fog vars
+        varying vec4 fFogColor;
+        varying float fFogIntensity;
+
+        void main()
+        {
+            gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+        }
     </script>
 
 
@@ -352,12 +405,22 @@
         uniform mat4 translation;
         uniform mat4 rotation;
 
+        // fog properties
+        uniform vec4 fogColor;
+        uniform float fogIntensity;
+
         // vars to pass to fragment shader
         varying vec2 fTexCoord;
+        varying vec4 fFogColor;
+        varying float fFogIntensity;
 
         void main()
         {
+            // pass texture texture coord
             fTexCoord = tPosition;
+            fFogColor = fogColor;
+            fFogIntensity = fogIntensity;
+
             gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
         }
     </script>
@@ -368,9 +431,13 @@
         varying vec2 fTexCoord;
         uniform sampler2D defaultTex;
 
+        // fog vars
+        varying vec4 fFogColor;
+        varying float fFogIntensity;
+
         void main()
         {
-            gl_FragColor =  texture2D( defaultTex, fTexCoord );
+            gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
         }
     </script>
 
@@ -387,12 +454,22 @@
         uniform mat4 translation;
         uniform mat4 rotation;
 
+        // fog properties
+        uniform vec4 fogColor;
+        uniform float fogIntensity;
+
         // vars to pass to fragment shader
         varying vec2 fTexCoord;
+        varying vec4 fFogColor;
+        varying float fFogIntensity;
 
         void main()
         {
+            // pass texture texture coord
             fTexCoord = tPosition;
+            fFogColor = fogColor;
+            fFogIntensity = fogIntensity;
+
             gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
         }
     </script>
@@ -403,9 +480,13 @@
         varying vec2 fTexCoord;
         uniform sampler2D defaultTex;
 
+        // fog vars
+        varying vec4 fFogColor;
+        varying float fFogIntensity;
+
         void main()
         {
-            gl_FragColor =  texture2D( defaultTex, fTexCoord );
+            gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
         }
     </script>
 

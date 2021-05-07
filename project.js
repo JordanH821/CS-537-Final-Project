@@ -1,5 +1,5 @@
 'use strict';
-
+// Fog implementation based on the tutorial at: https://webglfundamentals.org/webgl/lessons/webgl-fog.html
 var canvas;
 var gl;
 var aspect = 1;
@@ -7,6 +7,7 @@ let fovDefault = 135.0;
 let aspectDefault = 1;
 let nearDefault = 0.01;
 let farDefault = 5.0;
+let fogIntensityDefault = 0.25;
 let currentObject = 0;
 let objects = {};
 let defaults = {};
@@ -20,12 +21,15 @@ let sceneProperties = {
         return perspective(this.fov, this.aspect, this.near, this.far);
     },
     modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 0), vec3(0, 1, 0)),
+    fogColor: vec4(0.8, 0.9, 1, 1),
+    fogIntensity: fogIntensityDefault,
 };
 
 function setSceneSliderValues() {
     $('#fov').val(sceneProperties.fov);
     $('#near').val(sceneProperties.near);
     $('#far').val(sceneProperties.far);
+    $('#fogIntensity').val(sceneProperties.fogIntensity);
 }
 
 function getCombinedRotation(x, y, z) {
@@ -279,6 +283,13 @@ function setupObjectShaderBuffers(obj) {
 
     // texture coord
     obj['tPosition'] = gl.getAttribLocation(obj['shader'], 'tPosition');
+
+    // fog properties
+    obj['fogColorLoc'] = gl.getUniformLocation(obj['shader'], 'fogColor');
+    obj['fogIntensityLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'fogIntensity'
+    );
 }
 
 function renderObject(obj) {
@@ -326,6 +337,10 @@ function renderObject(obj) {
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
     gl.uniform1i(gl.getUniformLocation(obj['shader'], 'defaultTex'), 0);
 
+    // pass fog properties
+    gl.uniform4fv(obj['fogColorLoc'], sceneProperties.fogColor);
+    gl.uniform1f(obj['fogIntensityLoc'], sceneProperties.fogIntensity);
+
     gl.drawElements(gl.TRIANGLES, obj['numVerts'], gl.UNSIGNED_SHORT, 0);
 }
 
@@ -339,6 +354,7 @@ function setupAfterDataLoad() {
 }
 
 function render() {
+    gl.clearColor(...sceneProperties.fogColor);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     for (const obj of Object.values(objects)) {
         if (obj['isRendering']) renderObject(obj);
@@ -427,7 +443,7 @@ function setupOnClickListeners() {
         $('#render').prop('checked', true);
     });
 
-    $('#fov, #near, #far').on('change', (e) => {
+    $('#fov, #near, #far, #fogIntensity').on('change', (e) => {
         sceneProperties[e.target.id] = Number.parseFloat(e.target.value);
     });
 
@@ -436,6 +452,7 @@ function setupOnClickListeners() {
         sceneProperties.aspect = aspectDefault;
         sceneProperties.near = nearDefault;
         sceneProperties.far = farDefault;
+        sceneProperties.fogIntensity = fogIntensityDefault;
         setSceneSliderValues();
     });
 }
