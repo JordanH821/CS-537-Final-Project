@@ -3,12 +3,15 @@
 var canvas;
 var gl;
 var aspect = 1;
-var modelViewMatrix = lookAt(
-    vec3(0.0, 0.0, -1) /* eye */,
-    vec3(0, 0, 0) /* looking at */,
-    vec3(0, 1, 0) /* up */
-);
-var projectionMatrix = perspective(135.0, aspect, 0.2, 10);
+
+let sceneProperties = {
+    projectionMatrix: perspective(135.0, aspect, 0.01, 10),
+    modelViewMatrix: lookAt(
+        vec3(0.0, 0.0, -1) /* eye */,
+        vec3(0, 0, 0) /* looking at */,
+        vec3(0, 1, 0)
+    ) /* up */,
+};
 
 let currentObject = 0;
 let objects = {};
@@ -285,13 +288,13 @@ function renderObject(obj) {
     gl.uniformMatrix4fv(
         obj['modelViewMatrixLoc'],
         false,
-        flatten(modelViewMatrix)
+        flatten(sceneProperties.modelViewMatrix)
     );
 
     gl.uniformMatrix4fv(
         obj['projectionMatrixLoc'],
         false,
-        flatten(projectionMatrix)
+        flatten(sceneProperties.projectionMatrix)
     );
 
     // pass scale
