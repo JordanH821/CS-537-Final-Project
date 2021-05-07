@@ -3,16 +3,30 @@
 var canvas;
 var gl;
 var aspect = 1;
-var modelViewMatrix = lookAt(
-    vec3(0.0, 0.0, -1) /* eye */,
-    vec3(0, 0, 0) /* looking at */,
-    vec3(0, 1, 0) /* up */
-);
-var projectionMatrix = perspective(135.0, aspect, 0.2, 10);
-
+let fovDefault = 135.0;
+let aspectDefault = 1;
+let nearDefault = 0.01;
+let farDefault = 5.0;
 let currentObject = 0;
 let objects = {};
 let defaults = {};
+
+let sceneProperties = {
+    fov: fovDefault,
+    aspect: aspectDefault,
+    near: nearDefault,
+    far: farDefault,
+    get projectionMatrix() {
+        return perspective(this.fov, this.aspect, this.near, this.far);
+    },
+    modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 0), vec3(0, 1, 0)),
+};
+
+function setSceneSliderValues() {
+    $('#fov').val(sceneProperties.fov);
+    $('#near').val(sceneProperties.near);
+    $('#far').val(sceneProperties.far);
+}
 
 function getCombinedRotation(x, y, z) {
     return mult(rotate(...x), mult(rotate(...y), rotate(...z)));
@@ -285,13 +299,13 @@ function renderObject(obj) {
     gl.uniformMatrix4fv(
         obj['modelViewMatrixLoc'],
         false,
-        flatten(modelViewMatrix)
+        flatten(sceneProperties.modelViewMatrix)
     );
 
     gl.uniformMatrix4fv(
         obj['projectionMatrixLoc'],
         false,
-        flatten(projectionMatrix)
+        flatten(sceneProperties.projectionMatrix)
     );
 
     // pass scale
@@ -334,6 +348,7 @@ function render() {
 
 function setDefaultHtmlValues() {
     $('#render').prop('checked', true);
+    setSceneSliderValues();
 }
 
 function setupOnClickListeners() {
@@ -402,7 +417,7 @@ function setupOnClickListeners() {
         );
     });
 
-    $('#restore').on('click', () => {
+    $('#restoreObject').on('click', () => {
         const objectKey = getObjectKey();
         const defaultObject = defaults[objectKey];
         const obj = objects[objectKey];
@@ -410,6 +425,18 @@ function setupOnClickListeners() {
             obj[key] = Array.isArray(val) ? [...val] : val;
         }
         $('#render').prop('checked', true);
+    });
+
+    $('#fov, #near, #far').on('change', (e) => {
+        sceneProperties[e.target.id] = Number.parseFloat(e.target.value);
+    });
+
+    $('#restoreSceneProperties').on('click', () => {
+        sceneProperties.fov = fovDefault;
+        sceneProperties.aspect = aspectDefault;
+        sceneProperties.near = nearDefault;
+        sceneProperties.far = farDefault;
+        setSceneSliderValues();
     });
 }
 
