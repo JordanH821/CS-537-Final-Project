@@ -29,6 +29,7 @@
         </div>
         <div class="row">
             <h3>Scene Modifications</h3>
+            <button type="button" id="restoreSceneProperties">Restore Scene Properties</button>
         </div>
         <div class="row">
             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
@@ -75,16 +76,16 @@
                         Projection properties
                     </label>
                     <div class="row">
-                        <small>Angle (45 - 135 degrees)</small>
-                        <input id="perspectiveAngle" type="range" min="45" max="135" step="5" value="90" />
+                        <small>FOV (90 - 180 degrees)</small>
+                        <input id="fov" type="range" min="90" max="180" step="5" value="135" />
                     </div>
                     <div class="row">
-                        <small>Near (0 - 10)</small>
-                        <input id="perspectiveNear" type="range" min="0" max="10" step="1" value="2" />
+                        <small>Near (0.01 - 2.0)</small>
+                        <input id="near" type="range" min="0.01" max="2.0" step=".01" value=".01" />
                     </div>
                     <div class="row">
-                        <small>Far (20 - 100)</small>
-                        <input id="perspectiveFar" type="range" min="20" max="100" step="1" value="2" />
+                        <small>Far (0.01 - 10.0)</small>
+                        <input id="far" type="range" min="0.01" max="10.0" step=".01" value="5.0" />
                     </div>
                 </div>
             </div>
@@ -106,7 +107,7 @@
                 </select>
                 <br />
                 <br />
-                <button type="button" id="restore">Restore Defaults</button>
+                <button type="button" id="restoreObject">Restore Object Defaults</button>
             </div>
             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
                 <div class="form-check">
