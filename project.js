@@ -20,6 +20,8 @@ let sceneProperties = {
         return perspective(this.fov, this.aspect, this.near, this.far);
     },
     modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 0), vec3(0, 1, 0)),
+    fogColor: vec4(0.8, 0.9, 1, 1),
+    fogAmount: 0.5,
 };
 
 function setSceneSliderValues() {
@@ -279,6 +281,10 @@ function setupObjectShaderBuffers(obj) {
 
     // texture coord
     obj['tPosition'] = gl.getAttribLocation(obj['shader'], 'tPosition');
+
+    // fog properties
+    obj['fogColorLoc'] = gl.getUniformLocation(obj['shader'], 'fogColor');
+    obj['fogAmountLoc'] = gl.getUniformLocation(obj['shader'], 'fogAmount');
 }
 
 function renderObject(obj) {
@@ -326,6 +332,10 @@ function renderObject(obj) {
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
     gl.uniform1i(gl.getUniformLocation(obj['shader'], 'defaultTex'), 0);
 
+    // pass fog properties
+    gl.uniform4fv(obj['fogColorLoc'], sceneProperties.fogColor);
+    gl.uniform1f(obj['fogAmountLoc'], sceneProperties.fogAmount);
+
     gl.drawElements(gl.TRIANGLES, obj['numVerts'], gl.UNSIGNED_SHORT, 0);
 }
 
@@ -339,6 +349,7 @@ function setupAfterDataLoad() {
 }
 
 function render() {
+    gl.clearColor(...sceneProperties.fogColor);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     for (const obj of Object.values(objects)) {
         if (obj['isRendering']) renderObject(obj);
