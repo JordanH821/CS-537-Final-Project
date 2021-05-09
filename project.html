@@ -227,7 +227,7 @@
                 fFogColor = fogColor;
                 fFogIntensity = fogIntensity;
 
-                gl_Position =  translation * rotation * scale * vPosition;
+                gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
 
@@ -310,6 +310,13 @@
             // texture vars
             varying vec2 fTexCoord;
             uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
 
             // fog vars
             varying vec4 fFogColor;
@@ -317,7 +324,23 @@
 
             void main()
             {
-                gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
             }
         </script>
 
@@ -350,7 +373,7 @@
                 fFogColor = fogColor;
                 fFogIntensity = fogIntensity;
 
-                gl_Position = translation * rotation * scale * vPosition;
+                gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
 
@@ -360,6 +383,13 @@
             // texture vars
             varying vec2 fTexCoord;
             uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
 
             // fog vars
             varying vec4 fFogColor;
@@ -367,7 +397,23 @@
 
             void main()
             {
-                gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
             }
         </script>
 
@@ -410,6 +456,13 @@
             // texture vars
             varying vec2 fTexCoord;
             uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
 
             // fog vars
             varying vec4 fFogColor;
@@ -417,7 +470,23 @@
 
             void main()
             {
-                gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
             }
         </script>
 
@@ -459,6 +528,13 @@
             // texture vars
             varying vec2 fTexCoord;
             uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
 
             // fog vars
             varying vec4 fFogColor;
@@ -466,7 +542,23 @@
 
             void main()
             {
-                gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
             }
         </script>
 
@@ -508,6 +600,13 @@
             // texture vars
             varying vec2 fTexCoord;
             uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
 
             // fog vars
             varying vec4 fFogColor;
@@ -515,7 +614,23 @@
 
             void main()
             {
-                gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
             }
         </script>
 

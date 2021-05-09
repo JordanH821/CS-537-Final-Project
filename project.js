@@ -67,9 +67,9 @@ let kitty = {
     textureHtmlId: 'kittyTexture',
     vertexShader: 'kitty-vertex-shader',
     fragmentShader: 'kitty-fragment-shader',
-    scale: scalem(0.01, 0.01, 0.01),
-    translationVector: vec3(0.25, 0.25, 0),
-    rotateX: vec4(0, 1, 0, 0),
+    scale: scalem(0.015, 0.015, 0.015),
+    translationVector: vec3(-0.5, 0.5, 0),
+    rotateX: vec4(-10, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
     isRendering: true,
@@ -81,10 +81,10 @@ let puppy = {
     textureHtmlId: 'puppyTexture',
     vertexShader: 'puppy-vertex-shader',
     fragmentShader: 'puppy-fragment-shader',
-    scale: scalem(0.01, 0.01, 0.01),
-    translationVector: vec3(-0.25, 0.25, 0),
-    rotateX: vec4(0, 1, 0, 0),
-    rotateY: vec4(180, 0, 1, 0),
+    scale: scalem(0.015, 0.015, 0.015),
+    translationVector: vec3(0.5, 0.5, 0),
+    rotateX: vec4(-10, 1, 0, 0),
+    rotateY: vec4(225, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
     isRendering: true,
 };
@@ -430,6 +430,7 @@ function render() {
 function setDefaultHtmlValues() {
     $('#render').prop('checked', true);
     setSceneSliderValues();
+    $('#textureSelect').val(0);
 }
 
 function setupOnClickListeners() {
@@ -505,6 +506,8 @@ function setupOnClickListeners() {
         for (const [key, val] of Object.entries(defaultObject)) {
             obj[key] = Array.isArray(val) ? [...val] : val;
         }
+        obj['currentTexture'] = 0;
+        $('#textureSelect').val(0);
         $('#render').prop('checked', true);
     });
 
