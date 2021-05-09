@@ -528,6 +528,15 @@ function setupOnClickListeners() {
         const object = getSelectedObject();
         object['currentTexture'] = Number.parseInt(e.target.value);
     });
+
+    $(window).resize(() => {
+        // basic window resizing from Week 4 Animation and Interaction slides
+        let min = innerWidth;
+        if (innerHeight < min) min = innerHeight;
+        if (min < canvas.width || min < canvas.height) {
+            gl.viewport(0, canvas.height - min, min, min);
+        }
+    });
 }
 
 window.onload = function init() {
