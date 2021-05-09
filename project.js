@@ -11,6 +11,7 @@ let fogIntensityDefault = 0.25;
 let currentObject = 0;
 let objects = {};
 let defaults = {};
+let additionalTextures = {};
 
 let sceneProperties = {
     fov: fovDefault,
@@ -66,9 +67,9 @@ let kitty = {
     textureHtmlId: 'kittyTexture',
     vertexShader: 'kitty-vertex-shader',
     fragmentShader: 'kitty-fragment-shader',
-    scale: scalem(0.01, 0.01, 0.01),
-    translationVector: vec3(0.25, 0.25, 0),
-    rotateX: vec4(0, 1, 0, 0),
+    scale: scalem(0.015, 0.015, 0.015),
+    translationVector: vec3(-0.5, 0.5, 0),
+    rotateX: vec4(-10, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
     isRendering: true,
@@ -80,10 +81,10 @@ let puppy = {
     textureHtmlId: 'puppyTexture',
     vertexShader: 'puppy-vertex-shader',
     fragmentShader: 'puppy-fragment-shader',
-    scale: scalem(0.01, 0.01, 0.01),
-    translationVector: vec3(-0.25, 0.25, 0),
-    rotateX: vec4(0, 1, 0, 0),
-    rotateY: vec4(180, 0, 1, 0),
+    scale: scalem(0.015, 0.015, 0.015),
+    translationVector: vec3(0.5, 0.5, 0),
+    rotateX: vec4(-10, 1, 0, 0),
+    rotateY: vec4(225, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
     isRendering: true,
 };
@@ -149,6 +150,7 @@ for (const [name, obj] of Object.entries(objects)) {
     Object.defineProperty(obj, 'translation', translationGetter);
     Object.defineProperty(obj, 'rotation', rotationGetter);
     defaults[name] = deepCopy(obj);
+    obj['currentTexture'] = 0;
 }
 
 function getOrderedNormalsFromObj(o) {
@@ -223,6 +225,50 @@ function configureTextures(obj) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 }
 
+function configureAdditionalTextures() {
+    // additional textures
+    for (const texture of additionalTextures) {
+        texture['texture'] = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture['texture']);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        texture['textureImage'] = document.getElementById(
+            texture['textureHtmlId']
+        );
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGB,
+            gl.RGB,
+            gl.UNSIGNED_BYTE,
+            texture['textureImage']
+        );
+        function isPowerOf2(value) {
+            return (value & (value - 1)) == 0;
+        }
+        //   https://stackoverflow.com/questions/57381386/what-is-the-mipmapping-and-power-of-two-error
+        if (
+            isPowerOf2(texture['textureImage'].width) &&
+            isPowerOf2(texture['textureImage'].height)
+        ) {
+            // Yes, it's a power of 2. Generate mips.
+            gl.generateMipmap(gl.TEXTURE_2D);
+        } else {
+            // No, it's not a power of 2. Turn off mips and set wrapping to clamp to edge
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_S,
+                gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_T,
+                gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        }
+    }
+}
+
 function setupObjectShaderBuffers(obj) {
     // init shaders
     obj['shader'] = initShaders(gl, obj['vertexShader'], obj['fragmentShader']);
@@ -290,6 +336,11 @@ function setupObjectShaderBuffers(obj) {
         obj['shader'],
         'fogIntensity'
     );
+
+    obj['currentTextureLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'currentTexture'
+    );
 }
 
 function renderObject(obj) {
@@ -337,6 +388,19 @@ function renderObject(obj) {
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
     gl.uniform1i(gl.getUniformLocation(obj['shader'], 'defaultTex'), 0);
 
+    // pass additional textures
+    for (const [i, texture] of additionalTextures.entries()) {
+        gl.activeTexture(texture['textureCode']);
+        gl.bindTexture(gl.TEXTURE_2D, texture['texture']);
+        gl.uniform1i(
+            gl.getUniformLocation(obj['shader'], texture['name']),
+            i + 1
+        );
+    }
+
+    // pass current texture
+    gl.uniform1i(obj['currentTextureLoc'], obj['currentTexture']);
+
     // pass fog properties
     gl.uniform4fv(obj['fogColorLoc'], sceneProperties.fogColor);
     gl.uniform1f(obj['fogIntensityLoc'], sceneProperties.fogIntensity);
@@ -350,6 +414,7 @@ function setupAfterDataLoad() {
         setupObjectShaderBuffers(obj);
         configureTextures(obj);
     }
+    configureAdditionalTextures();
     render();
 }
 
@@ -365,6 +430,7 @@ function render() {
 function setDefaultHtmlValues() {
     $('#render').prop('checked', true);
     setSceneSliderValues();
+    $('#textureSelect').val(0);
 }
 
 function setupOnClickListeners() {
@@ -440,6 +506,8 @@ function setupOnClickListeners() {
         for (const [key, val] of Object.entries(defaultObject)) {
             obj[key] = Array.isArray(val) ? [...val] : val;
         }
+        obj['currentTexture'] = 0;
+        $('#textureSelect').val(0);
         $('#render').prop('checked', true);
     });
 
@@ -455,6 +523,11 @@ function setupOnClickListeners() {
         sceneProperties.fogIntensity = fogIntensityDefault;
         setSceneSliderValues();
     });
+
+    $('#textureSelect').on('change', (e) => {
+        const object = getSelectedObject();
+        object['currentTexture'] = Number.parseInt(e.target.value);
+    });
 }
 
 window.onload = function init() {
@@ -469,6 +542,40 @@ window.onload = function init() {
     gl.viewport(0, 0, canvas.width, canvas.height);
     aspect = canvas.width / canvas.height;
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
+
+    // set up additional textures
+    additionalTextures = [
+        {
+            name: 'boat',
+            textureHtmlId: 'boatTexture',
+            textureCode: gl.TEXTURE1,
+        },
+        {
+            name: 'camo',
+            textureHtmlId: 'camoTexture',
+            textureCode: gl.TEXTURE2,
+        },
+        {
+            name: 'stone',
+            textureHtmlId: 'stoneTexture',
+            textureCode: gl.TEXTURE3,
+        },
+        {
+            name: 'tiger',
+            textureHtmlId: 'tigerTexture',
+            textureCode: gl.TEXTURE4,
+        },
+        {
+            name: 'watermelon',
+            textureHtmlId: 'watermelonTexture',
+            textureCode: gl.TEXTURE5,
+        },
+        {
+            name: 'zebra',
+            textureHtmlId: 'zebraTexture',
+            textureCode: gl.TEXTURE6,
+        },
+    ];
 
     // set default html values
     setDefaultHtmlValues();
