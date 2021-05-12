@@ -3,7 +3,7 @@
 
 <head>
     <title>CS-537 Final Project</title>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 </head>
@@ -29,13 +29,14 @@
         </div>
         <div class="row">
             <h3>Scene Modifications</h3>
+            <button type="button" id="restoreSceneProperties">
+                Restore Scene Properties
+            </button>
         </div>
         <div class="row">
             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
                 <div class="form-check">
-                    <label for="ambient">
-                        Ambient Light
-                    </label>
+                    <label for="ambient"> Ambient Light </label>
                     <br />
                     <div>
                         <small>Intensity</small>
@@ -45,55 +46,53 @@
             </div>
             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
                 <div class="form-check">
-                    <label for="sun">
-                        Sun Point Light
-                    </label>
+                    <label for="sun"> Sun Point Light </label>
                     <br />
                     <div>
                         <small>Intensity</small>
                         <input id="sunIntensity" type="range" min="0" max="100" step="10" value="50" />
                     </div>
                     <label for="sunTime">Time of Day:</label>
-                    <input type="time" id="sunTime" name="sunTime">
+                    <input type="time" id="sunTime" name="sunTime" />
                 </div>
             </div>
             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
                 <div class="form-check">
-                    <label for="sun">
-                        Fog
-                    </label>
+                    <label for="sun"> Fog </label>
                     <br />
                     <div>
-                        <small>Intensity</small>
-                        <input id="fogIntensity" type="range" min="0" max="100" step="10" value="50" />
+                        <small>Intensity (0.0 - 1.0)</small>
+                        <input id="fogIntensity" type="range" min="0.0" max="1.0" step=".01" value="0" />
                     </div>
                 </div>
             </div>
             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
                 <div class="form-check">
-                    <label for="projection">
-                        Projection properties
-                    </label>
+                    <label for="projection"> Projection properties </label>
                     <div class="row">
-                        <small>Angle (45 - 135 degrees)</small>
-                        <input id="perspectiveAngle" type="range" min="45" max="135" step="5" value="90" />
+                        <small>FOV (90 - 180 degrees)</small>
+                        <input id="fov" type="range" min="90" max="180" step="5" value="135" />
                     </div>
                     <div class="row">
-                        <small>Near (0 - 10)</small>
-                        <input id="perspectiveNear" type="range" min="0" max="10" step="1" value="2" />
+                        <small>Near (0.01 - 2.0)</small>
+                        <input id="near" type="range" min="0.01" max="2.0" step=".01" value=".01" />
                     </div>
                     <div class="row">
-                        <small>Far (20 - 100)</small>
-                        <input id="perspectiveFar" type="range" min="20" max="100" step="1" value="2" />
+                        <small>Far (0.01 - 10.0)</small>
+                        <input id="far" type="range" min="0.01" max="10.0" step=".01" value="5.0" />
                     </div>
                 </div>
             </div>
         </div>
         <div class="row">
             <h3>Object Modifications</h3>
+            <button type="button" id="restoreObject">
+                Restore Object Defaults
+            </button>
         </div>
         <div class="row">
             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <br />
                 <label for="object">Choose an object:</label>
                 <br />
                 <select name="object" id="objectSelect">
@@ -106,21 +105,27 @@
                 </select>
                 <br />
                 <br />
-                <button type="button" id="restore">Restore Defaults</button>
+                <label for="texture">Choose a texture:</label>
+                <br />
+                <select name="texture" id="textureSelect">
+                    <option value="0">Default</option>
+                    <option value="1">Boat</option>
+                    <option value="2">Camo</option>
+                    <option value="3">Stone</option>
+                    <option value="4">Tiger</option>
+                    <option value="5">Watermelon</option>
+                    <option value="6">Zebra</option>
+                </select>
             </div>
             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
                 <div class="form-check">
-                    <label for="render">
-                        Render Object
-                    </label>
+                    <label for="render"> Render Object </label>
                     <br />
-                    <input class="form-check-input" type="checkbox" name="render" id="render" checked>
+                    <input class="form-check-input" type="checkbox" name="render" id="render" checked />
                 </div>
             </div>
             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
-                <label for="render">
-                    Rotation
-                </label>
+                <label for="render"> Rotation </label>
                 <div class="row">
                     <small>(About X-Axis)</small>
                     <br />
@@ -145,17 +150,19 @@
                     <small>(About Z-Axis)</small>
                     <br />
                     <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
-                        <button class="rotation" id="counterclockwise">Counterclockwise</button>
+                        <button class="rotation" id="counterclockwise">
+                            Counterclockwise
+                        </button>
                     </div>
                     <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
-                        <button class="rotation" id="clockwise">Clockwise</button>
+                        <button class="rotation" id="clockwise">
+                            Clockwise
+                        </button>
                     </div>
                 </div>
             </div>
             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
-                <label for="translation">
-                    Translation
-                </label>
+                <label for="translation"> Translation </label>
                 <div class="row">
                     <small>(X-Axis)</small>
                     <br />
@@ -191,7 +198,6 @@
     </div>
 
     <!-- obj shaders -->
-    <!-- TODO: complete the shaders -->
     <script id="kitty-vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
@@ -205,27 +211,63 @@
             uniform mat4 translation;
             uniform mat4 rotation;
 
+            // fog properties
+            uniform vec4 fogColor;
+            uniform float fogIntensity;
+
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
                 // pass texture texture coord
                 fTexCoord = tPosition;
+                fFogColor = fogColor;
+                fFogIntensity = fogIntensity;
 
-                gl_Position =  translation * rotation * scale * vPosition;
+                gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
+
     <script id="kitty-fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
 
             // texture vars
             varying vec2 fTexCoord;
             uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
+
+            // fog vars
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
-                gl_FragColor =  texture2D( defaultTex, fTexCoord );
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
             }
         </script>
 
@@ -242,18 +284,23 @@
             uniform mat4 translation;
             uniform mat4 rotation;
 
-            uniform mat3 normMatrix;
+            // fog properties
+            uniform vec4 fogColor;
+            uniform float fogIntensity;
 
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
+                // pass texture texture coord
                 fTexCoord = tPosition;
+                fFogColor = fogColor;
+                fFogIntensity = fogIntensity;
 
-                vec3 norm = normalize(normMatrix * normal.xyz)
-
-                gl_Position = translation * rotation * scale * vPosition;
+                gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
 
@@ -263,10 +310,37 @@
             // texture vars
             varying vec2 fTexCoord;
             uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
+
+            // fog vars
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
-                gl_FragColor =  texture2D( defaultTex, fTexCoord );
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
             }
         </script>
 
@@ -283,13 +357,23 @@
             uniform mat4 translation;
             uniform mat4 rotation;
 
+            // fog properties
+            uniform vec4 fogColor;
+            uniform float fogIntensity;
+
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
+                // pass texture texture coord
                 fTexCoord = tPosition;
-                gl_Position = translation * rotation * scale * vPosition;
+                fFogColor = fogColor;
+                fFogIntensity = fogIntensity;
+
+                gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
 
@@ -299,10 +383,37 @@
             // texture vars
             varying vec2 fTexCoord;
             uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
+
+            // fog vars
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
-                gl_FragColor =  texture2D( defaultTex, fTexCoord );
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
             }
         </script>
 
@@ -319,13 +430,23 @@
             uniform mat4 translation;
             uniform mat4 rotation;
 
+            // fog properties
+            uniform vec4 fogColor;
+            uniform float fogIntensity;
+
             // vars to pass to fragment shader
             varying vec2 fTexCoord;
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
+                // pass texture texture coord
                 fTexCoord = tPosition;
-                gl_Position = translation * rotation * scale * vPosition;
+                fFogColor = fogColor;
+                fFogIntensity = fogIntensity;
+
+                gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
 
@@ -335,83 +456,183 @@
             // texture vars
             varying vec2 fTexCoord;
             uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
+
+            // fog vars
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
 
             void main()
             {
-                gl_FragColor =  texture2D( defaultTex, fTexCoord );
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
             }
-    </script>
-
+        </script>
 
     <script id="pizza-vertex-shader" type="x-shader/x-vertex">
-        attribute vec4 vPosition;
-        attribute vec2 tPosition;
+            attribute vec4 vPosition;
+            attribute vec2 tPosition;
 
-        // camera properties
-        uniform mat4 modelViewMatrix;
-        uniform mat4 projectionMatrix;
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
 
-        // scale, translation, rotation
-        uniform mat4 scale;
-        uniform mat4 translation;
-        uniform mat4 rotation;
+            // scale, translation, rotation
+            uniform mat4 scale;
+            uniform mat4 translation;
+            uniform mat4 rotation;
 
-        // vars to pass to fragment shader
-        varying vec2 fTexCoord;
+            // fog properties
+            uniform vec4 fogColor;
+            uniform float fogIntensity;
 
-        void main()
-        {
-            fTexCoord = tPosition;
-            gl_Position = translation * rotation * scale * vPosition;
-        }
-    </script>
+            // vars to pass to fragment shader
+            varying vec2 fTexCoord;
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
+
+            void main()
+            {
+                // pass texture texture coord
+                fTexCoord = tPosition;
+                fFogColor = fogColor;
+                fFogIntensity = fogIntensity;
+
+                gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
+            }
+        </script>
     <script id="pizza-fragment-shader" type="x-shader/x-fragment">
-        precision mediump float;
+            precision mediump float;
 
-        // texture vars
-        varying vec2 fTexCoord;
-        uniform sampler2D defaultTex;
+            // texture vars
+            varying vec2 fTexCoord;
+            uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
 
-        void main()
-        {
-            gl_FragColor =  texture2D( defaultTex, fTexCoord );
-        }
-    </script>
+            // fog vars
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
+
+            void main()
+            {
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
+            }
+        </script>
 
     <script id="wooden_crate-vertex-shader" type="x-shader/x-vertex">
-        attribute vec4 vPosition;
-        attribute vec2 tPosition;
+            attribute vec4 vPosition;
+            attribute vec2 tPosition;
 
-        // camera properties
-        uniform mat4 modelViewMatrix;
-        uniform mat4 projectionMatrix;
+            // camera properties
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
 
-        // scale, translation, rotation
-        uniform mat4 scale;
-        uniform mat4 translation;
-        uniform mat4 rotation;
+            // scale, translation, rotation
+            uniform mat4 scale;
+            uniform mat4 translation;
+            uniform mat4 rotation;
 
-        // vars to pass to fragment shader
-        varying vec2 fTexCoord;
+            // fog properties
+            uniform vec4 fogColor;
+            uniform float fogIntensity;
 
-        void main()
-        {
-            fTexCoord = tPosition;
-            gl_Position = translation * rotation * scale * vPosition;
-        }
-    </script>
+            // vars to pass to fragment shader
+            varying vec2 fTexCoord;
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
+
+            void main()
+            {
+                // pass texture texture coord
+                fTexCoord = tPosition;
+                fFogColor = fogColor;
+                fFogIntensity = fogIntensity;
+
+                gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
+            }
+        </script>
     <script id="wooden_crate-fragment-shader" type="x-shader/x-fragment">
-        precision mediump float;
+            precision mediump float;
 
-        // texture vars
-        varying vec2 fTexCoord;
-        uniform sampler2D defaultTex;
+            // texture vars
+            varying vec2 fTexCoord;
+            uniform sampler2D defaultTex;
+            uniform sampler2D boat;
+            uniform sampler2D camo;
+            uniform sampler2D stone;
+            uniform sampler2D tiger;
+            uniform sampler2D watermelon;
+            uniform sampler2D zebra;
+            uniform int currentTexture;
 
-        void main()
-        {
-            gl_FragColor =  texture2D( defaultTex, fTexCoord );
-        }
-    </script>
+            // fog vars
+            varying vec4 fFogColor;
+            varying float fFogIntensity;
+
+            void main()
+            {
+                if(currentTexture == 0){
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 1){
+                    gl_FragColor =  mix(texture2D( boat, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 2){
+                    gl_FragColor =  mix(texture2D( camo, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 3){
+                    gl_FragColor =  mix(texture2D( stone, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 4){
+                    gl_FragColor =  mix(texture2D( tiger, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 5){
+                    gl_FragColor =  mix(texture2D( watermelon, fTexCoord ), fFogColor, fFogIntensity);
+                } else if(currentTexture == 6){
+                    gl_FragColor =  mix(texture2D( zebra, fTexCoord ), fFogColor, fFogIntensity);
+                } else {
+                    gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
+                }
+            }
+        </script>
 
     <!-- required scripts -->
     <script type="text/javascript" src="../Common/webgl-utils.js"></script>
@@ -422,7 +643,7 @@
 
     <!-- Bootstrap -->
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
 
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -431,27 +652,34 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
     <!-- texture images -->
-    <img alt="kittyTexture" id="kittyTexture" src="./objs/kitty/color.jpg" hidden></img>
-    <img alt="kittyNormal" id="kittyNormal" src="./objs/kitty/normal.jpg" hidden></img>
+    <img alt="kittyTexture" id="kittyTexture" src="./objs/kitty/color.jpg" hidden />
+    <img alt="kittyNormal" id="kittyNormal" src="./objs/kitty/normal.jpg" hidden />
 
-    <img alt="pumpkinTexture" id="pumpkinTexture" src="./objs/pumpkin/pumpkin_color.jpg" hidden></img>
-    <img alt="pumpkinBump" id="pumpkinBump" src="./objs/pumpkin/pumpkin_bump.jpg" hidden></img>
-    <img alt="stalkTexture" id="stalkTexture" src="./objs/pumpkin/stalk_color.jpg" hidden></img>
-    <img alt="stalkBump" id="stalkBump" src="./objs/pumpkin/stalk_bump.jpg" hidden></img>
+    <img alt="pumpkinTexture" id="pumpkinTexture" src="./objs/pumpkin/pumpkin_color.jpg" hidden />
+    <img alt="pumpkinBump" id="pumpkinBump" src="./objs/pumpkin/pumpkin_bump.jpg" hidden />
+    <img alt="stalkTexture" id="stalkTexture" src="./objs/pumpkin/stalk_color.jpg" hidden />
+    <img alt="stalkBump" id="stalkBump" src="./objs/pumpkin/stalk_bump.jpg" hidden />
 
-    <img alt="puppyTexture" id="puppyTexture" src="./objs/puppy/color.jpg" hidden></img>
-    <img alt="puppyNormal" id="puppyNormal" src="./objs/puppy/normal.jpg" hidden></img>
+    <img alt="puppyTexture" id="puppyTexture" src="./objs/puppy/color.jpg" hidden />
+    <img alt="puppyNormal" id="puppyNormal" src="./objs/puppy/normal.jpg" hidden />
 
-    <img alt="rockTexture" id="rockTexture" src="./objs/rock/color.jpg" hidden></img>
-    <img alt="rockNormal" id="rockNormal" src="./objs/rock/normal.jpg" hidden></img>
-    <img alt="rockGlossiness" id="rockGlossiness" src="./objs/rock/glossiness.jpg" hidden></img>
-    <img alt="rockOcclusion" id="rockOcclusion" src="./objs/rock/occlusion.jpg" hidden></img>
-    <img alt="rockSpecular" id="rockSpecular" src="./objs/rock/specular.jpg" hidden></img>
+    <img alt="rockTexture" id="rockTexture" src="./objs/rock/color.jpg" hidden />
+    <img alt="rockNormal" id="rockNormal" src="./objs/rock/normal.jpg" hidden />
+    <img alt="rockGlossiness" id="rockGlossiness" src="./objs/rock/glossiness.jpg" hidden />
+    <img alt="rockOcclusion" id="rockOcclusion" src="./objs/rock/occlusion.jpg" hidden />
+    <img alt="rockSpecular" id="rockSpecular" src="./objs/rock/specular.jpg" hidden />
 
-    <img alt="pizzaTexture" id="pizzaTexture" src="./objs/pizza/PIZZA_TEXTURES/1k/pizza_5k_BaseColor_1k.jpg"
-        hidden></img>
+    <img alt="pizzaTexture" id="pizzaTexture" src="./objs/pizza/PIZZA_TEXTURES/1k/pizza_5k_BaseColor_1k.jpg" hidden />
 
-    <img alt="woodenCrateTexture" id="woodenCrateTexture" src="./objs/box/crate_BaseColor.png" hidden></img>
+    <img alt="woodenCrateTexture" id="woodenCrateTexture" src="./objs/box/crate_BaseColor.png" hidden />
+
+    <!-- Additional Textures -->
+    <img alt="boat" id="boatTexture" src="./textures/boat.jpg" hidden />
+    <img alt="camo" id="camoTexture" src="./textures/camo.jpg" hidden />
+    <img alt="stone" id="stoneTexture" src="./textures/stone.jpg" hidden />
+    <img alt="tiger" id="tigerTexture" src="./textures/tiger.png" hidden />
+    <img alt="watermelon" id="watermelonTexture" src="./textures/watermelon.jpg" hidden />
+    <img alt="zebra" id="zebraTexture" src="./textures/zebra.png" hidden />
 </body>
 
 </html>

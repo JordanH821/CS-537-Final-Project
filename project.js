@@ -1,18 +1,37 @@
 'use strict';
-
+// Fog implementation based on the tutorial at: https://webglfundamentals.org/webgl/lessons/webgl-fog.html
 var canvas;
 var gl;
 var aspect = 1;
-var modelViewMatrix = lookAt(
-    vec3(0.0, 0.0, -1) /* eye */,
-    vec3(0, 0, 0) /* looking at */,
-    vec3(0, 1, 0) /* up */
-);
-var projectionMatrix = perspective(135.0, aspect, 0.2, 10);
-
+let fovDefault = 135.0;
+let aspectDefault = 1;
+let nearDefault = 0.01;
+let farDefault = 5.0;
+let fogIntensityDefault = 0.25;
 let currentObject = 0;
 let objects = {};
 let defaults = {};
+let additionalTextures = {};
+
+let sceneProperties = {
+    fov: fovDefault,
+    aspect: aspectDefault,
+    near: nearDefault,
+    far: farDefault,
+    get projectionMatrix() {
+        return perspective(this.fov, this.aspect, this.near, this.far);
+    },
+    modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 0), vec3(0, 1, 0)),
+    fogColor: vec4(0.8, 0.9, 1, 1),
+    fogIntensity: fogIntensityDefault,
+};
+
+function setSceneSliderValues() {
+    $('#fov').val(sceneProperties.fov);
+    $('#near').val(sceneProperties.near);
+    $('#far').val(sceneProperties.far);
+    $('#fogIntensity').val(sceneProperties.fogIntensity);
+}
 
 function getCombinedRotation(x, y, z) {
     return mult(rotate(...x), mult(rotate(...y), rotate(...z)));
@@ -48,9 +67,9 @@ let kitty = {
     textureHtmlId: 'kittyTexture',
     vertexShader: 'kitty-vertex-shader',
     fragmentShader: 'kitty-fragment-shader',
-    scale: scalem(0.01, 0.01, 0.01),
-    translationVector: vec3(0.25, 0.25, 0),
-    rotateX: vec4(0, 1, 0, 0),
+    scale: scalem(0.015, 0.015, 0.015),
+    translationVector: vec3(-0.5, 0.5, 0),
+    rotateX: vec4(-10, 1, 0, 0),
     rotateY: vec4(180, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
     isRendering: true,
@@ -62,10 +81,10 @@ let puppy = {
     textureHtmlId: 'puppyTexture',
     vertexShader: 'puppy-vertex-shader',
     fragmentShader: 'puppy-fragment-shader',
-    scale: scalem(0.01, 0.01, 0.01),
-    translationVector: vec3(-0.25, 0.25, 0),
-    rotateX: vec4(0, 1, 0, 0),
-    rotateY: vec4(180, 0, 1, 0),
+    scale: scalem(0.015, 0.015, 0.015),
+    translationVector: vec3(0.5, 0.5, 0),
+    rotateX: vec4(-10, 1, 0, 0),
+    rotateY: vec4(225, 0, 1, 0),
     rotateZ: vec4(0, 0, 0, 1),
     isRendering: true,
 };
@@ -131,6 +150,7 @@ for (const [name, obj] of Object.entries(objects)) {
     Object.defineProperty(obj, 'translation', translationGetter);
     Object.defineProperty(obj, 'rotation', rotationGetter);
     defaults[name] = deepCopy(obj);
+    obj['currentTexture'] = 0;
 }
 
 function getOrderedNormalsFromObj(o) {
@@ -205,32 +225,46 @@ function configureTextures(obj) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 }
 
-function normalMap(obj) {
-    let bumpData = new Arrray();
-    let normals = newArray();
-
-    for (var i = 0; i <= obj['textureImage'].size(); ++i) {
-        bumpData[i] = new Array();
-
-        for (var j = 0; i <= obj['textureImage'].size(); ++j) {
-            bumpData[i][j] = 0;
+function configureAdditionalTextures() {
+    // additional textures
+    for (const texture of additionalTextures) {
+        texture['texture'] = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture['texture']);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        texture['textureImage'] = document.getElementById(
+            texture['textureHtmlId']
+        );
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGB,
+            gl.RGB,
+            gl.UNSIGNED_BYTE,
+            texture['textureImage']
+        );
+        function isPowerOf2(value) {
+            return (value & (value - 1)) == 0;
         }
-    }
-
-    for (var i = obj['textureImage'].size()/4; i < 3*obj['textureImage'].size()/4; ++i) {
-        for (var j = obj['textureImage'].size()/4; j < 3*obj['textureImage'].size()/4; ++j) {
-            bumpData[i][j] = 1.0;
-        }
-    }
-
-    for (var i = 0; i < obj['textureImage'].size(); ++i) {
-        normals[i] = new Array();
-
-        for (var j = 0; j < obj['textureImage'].size(); ++j) {
-            normals[i][j] = new Array();
-            normals[i][j][0] = bumpData[i][j]-bumpData[i+1][j];
-            normals[i][j][1] = bumpData[i][j]-bumpData[i][j+1];
-            normals[i][j][2] = 1;
+        //   https://stackoverflow.com/questions/57381386/what-is-the-mipmapping-and-power-of-two-error
+        if (
+            isPowerOf2(texture['textureImage'].width) &&
+            isPowerOf2(texture['textureImage'].height)
+        ) {
+            // Yes, it's a power of 2. Generate mips.
+            gl.generateMipmap(gl.TEXTURE_2D);
+        } else {
+            // No, it's not a power of 2. Turn off mips and set wrapping to clamp to edge
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_S,
+                gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_T,
+                gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         }
     }
 }
@@ -295,6 +329,18 @@ function setupObjectShaderBuffers(obj) {
 
     // texture coord
     obj['tPosition'] = gl.getAttribLocation(obj['shader'], 'tPosition');
+
+    // fog properties
+    obj['fogColorLoc'] = gl.getUniformLocation(obj['shader'], 'fogColor');
+    obj['fogIntensityLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'fogIntensity'
+    );
+
+    obj['currentTextureLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'currentTexture'
+    );
 }
 
 function renderObject(obj) {
@@ -315,13 +361,13 @@ function renderObject(obj) {
     gl.uniformMatrix4fv(
         obj['modelViewMatrixLoc'],
         false,
-        flatten(modelViewMatrix)
+        flatten(sceneProperties.modelViewMatrix)
     );
 
     gl.uniformMatrix4fv(
         obj['projectionMatrixLoc'],
         false,
-        flatten(projectionMatrix)
+        flatten(sceneProperties.projectionMatrix)
     );
 
     // pass scale
@@ -342,6 +388,23 @@ function renderObject(obj) {
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
     gl.uniform1i(gl.getUniformLocation(obj['shader'], 'defaultTex'), 0);
 
+    // pass additional textures
+    for (const [i, texture] of additionalTextures.entries()) {
+        gl.activeTexture(texture['textureCode']);
+        gl.bindTexture(gl.TEXTURE_2D, texture['texture']);
+        gl.uniform1i(
+            gl.getUniformLocation(obj['shader'], texture['name']),
+            i + 1
+        );
+    }
+
+    // pass current texture
+    gl.uniform1i(obj['currentTextureLoc'], obj['currentTexture']);
+
+    // pass fog properties
+    gl.uniform4fv(obj['fogColorLoc'], sceneProperties.fogColor);
+    gl.uniform1f(obj['fogIntensityLoc'], sceneProperties.fogIntensity);
+
     gl.drawElements(gl.TRIANGLES, obj['numVerts'], gl.UNSIGNED_SHORT, 0);
 }
 
@@ -351,10 +414,12 @@ function setupAfterDataLoad() {
         setupObjectShaderBuffers(obj);
         configureTextures(obj);
     }
+    configureAdditionalTextures();
     render();
 }
 
 function render() {
+    gl.clearColor(...sceneProperties.fogColor);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     for (const obj of Object.values(objects)) {
         if (obj['isRendering']) renderObject(obj);
@@ -364,6 +429,8 @@ function render() {
 
 function setDefaultHtmlValues() {
     $('#render').prop('checked', true);
+    setSceneSliderValues();
+    $('#textureSelect').val(0);
 }
 
 function setupOnClickListeners() {
@@ -432,14 +499,43 @@ function setupOnClickListeners() {
         );
     });
 
-    $('#restore').on('click', () => {
+    $('#restoreObject').on('click', () => {
         const objectKey = getObjectKey();
         const defaultObject = defaults[objectKey];
         const obj = objects[objectKey];
         for (const [key, val] of Object.entries(defaultObject)) {
             obj[key] = Array.isArray(val) ? [...val] : val;
         }
+        obj['currentTexture'] = 0;
+        $('#textureSelect').val(0);
         $('#render').prop('checked', true);
+    });
+
+    $('#fov, #near, #far, #fogIntensity').on('change', (e) => {
+        sceneProperties[e.target.id] = Number.parseFloat(e.target.value);
+    });
+
+    $('#restoreSceneProperties').on('click', () => {
+        sceneProperties.fov = fovDefault;
+        sceneProperties.aspect = aspectDefault;
+        sceneProperties.near = nearDefault;
+        sceneProperties.far = farDefault;
+        sceneProperties.fogIntensity = fogIntensityDefault;
+        setSceneSliderValues();
+    });
+
+    $('#textureSelect').on('change', (e) => {
+        const object = getSelectedObject();
+        object['currentTexture'] = Number.parseInt(e.target.value);
+    });
+
+    $(window).resize(() => {
+        // basic window resizing from Week 4 Animation and Interaction slides
+        let min = innerWidth;
+        if (innerHeight < min) min = innerHeight;
+        if (min < canvas.width || min < canvas.height) {
+            gl.viewport(0, canvas.height - min, min, min);
+        }
     });
 }
 
@@ -455,6 +551,40 @@ window.onload = function init() {
     gl.viewport(0, 0, canvas.width, canvas.height);
     aspect = canvas.width / canvas.height;
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
+
+    // set up additional textures
+    additionalTextures = [
+        {
+            name: 'boat',
+            textureHtmlId: 'boatTexture',
+            textureCode: gl.TEXTURE1,
+        },
+        {
+            name: 'camo',
+            textureHtmlId: 'camoTexture',
+            textureCode: gl.TEXTURE2,
+        },
+        {
+            name: 'stone',
+            textureHtmlId: 'stoneTexture',
+            textureCode: gl.TEXTURE3,
+        },
+        {
+            name: 'tiger',
+            textureHtmlId: 'tigerTexture',
+            textureCode: gl.TEXTURE4,
+        },
+        {
+            name: 'watermelon',
+            textureHtmlId: 'watermelonTexture',
+            textureCode: gl.TEXTURE5,
+        },
+        {
+            name: 'zebra',
+            textureHtmlId: 'zebraTexture',
+            textureCode: gl.TEXTURE6,
+        },
+    ];
 
     // set default html values
     setDefaultHtmlValues();
