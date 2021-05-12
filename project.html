@@ -310,22 +310,15 @@
         </script>
 
     <script id="pumpkin-fragment-shader" type="x-shader/x-fragment">
-            precision mediump float;
+            
 
-            // texture vars
-            varying vec2 fTexCoord;
-            varying vec2 normCoord;
-            uniform sampler2D defaultTex; 
-            uniform sampler2D normalMap;
+                precision mediump float;
 
-            void main()
-            {
-                vec3 normal = texture2D( normalMap, normCoord ).rgb;
-                
-                normal = normalize(normal * 2.0 - 1.0);
-
-                gl_FragColor =  texture2D( defaultTex, fTexCoord );
-            uniform sampler2D defaultTex;
+                // texture vars
+                varying vec2 fTexCoord;
+                varying vec2 normCoord;
+                uniform sampler2D defaultTex; 
+                uniform sampler2D normalMap;
             uniform sampler2D boat;
             uniform sampler2D camo;
             uniform sampler2D stone;
