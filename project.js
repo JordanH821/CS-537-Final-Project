@@ -208,6 +208,7 @@ function configureTextures(obj) {
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     obj['textureImage'] = document.getElementById(obj['textureHtmlId']);
+    
     gl.texImage2D(
         gl.TEXTURE_2D,
         0,
@@ -223,6 +224,27 @@ function configureTextures(obj) {
         gl.NEAREST_MIPMAP_LINEAR
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    obj['normal'] = gl.createTexture();
+    obj['normalImage'] = document.getElementById(obj['normalHtmlId']);
+    gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGB,
+        gl.RGB,
+        gl.UNSIGNED_BYTE,
+        obj['textureImage']
+    );
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(
+        gl.TEXTURE_2D,
+        gl.TEXTURE_MIN_FILTER,
+        gl.NEAREST_MIPMAP_LINEAR
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
 }
 
 function configureAdditionalTextures() {
@@ -303,6 +325,15 @@ function setupObjectShaderBuffers(obj) {
         gl.STATIC_DRAW
     );
 
+    // normal buffer
+    obj['normalBuffer'] = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['normalBuffer']);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(obj['normalCoords']),
+        gl.STATIC_DRAW
+    );
+
     // model view matrix location
     obj['modelViewMatrixLoc'] = gl.getUniformLocation(
         obj['shader'],
@@ -330,6 +361,8 @@ function setupObjectShaderBuffers(obj) {
     // texture coord
     obj['tPosition'] = gl.getAttribLocation(obj['shader'], 'tPosition');
 
+    // normal texture
+    obj['nPosition'] = gl.getAttribLocation(obj['shader'], 'nPosition');
     // fog properties
     obj['fogColorLoc'] = gl.getUniformLocation(obj['shader'], 'fogColor');
     obj['fogIntensityLoc'] = gl.getUniformLocation(
@@ -357,6 +390,11 @@ function renderObject(obj) {
     gl.vertexAttribPointer(obj['tPosition'], 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(obj['tPosition']);
 
+    // pass normal coords
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['normalBuffer']);
+    gl.vertexAttribPointer(obj['nPosition'], 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(obj['nPosition']);
+    
     // pass camera matrices
     gl.uniformMatrix4fv(
         obj['modelViewMatrixLoc'],
@@ -388,6 +426,9 @@ function renderObject(obj) {
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
     gl.uniform1i(gl.getUniformLocation(obj['shader'], 'defaultTex'), 0);
 
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
+    gl.uniform1i(gl.getUniformLocation(obj['shader'], 'normalMap'), 0);
     // pass additional textures
     for (const [i, texture] of additionalTextures.entries()) {
         gl.activeTexture(texture['textureCode']);
