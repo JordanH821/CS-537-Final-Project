@@ -65,6 +65,7 @@ function deepCopy(src) {
 let kitty = {
     objPath: './objs/kitty/kitty.obj',
     textureHtmlId: 'kittyTexture',
+    normalHtmlId: 'kittyNormal',
     vertexShader: 'kitty-vertex-shader',
     fragmentShader: 'kitty-fragment-shader',
     scale: scalem(0.015, 0.015, 0.015),
@@ -79,6 +80,7 @@ objects['kitty'] = kitty;
 let puppy = {
     objPath: './objs/puppy/Puppy.obj',
     textureHtmlId: 'puppyTexture',
+    normalHtmlId: 'puppyNormal',
     vertexShader: 'puppy-vertex-shader',
     fragmentShader: 'puppy-fragment-shader',
     scale: scalem(0.015, 0.015, 0.015),
@@ -107,6 +109,7 @@ objects['pumpkin'] = pumpkin;
 let rock = {
     objPath: './objs/rock/rock.obj',
     textureHtmlId: 'rockTexture',
+    normalHtmlId: 'rockNormal',
     vertexShader: 'pumpkin-vertex-shader',
     fragmentShader: 'pumpkin-fragment-shader',
     scale: scalem(0.02, 0.02, 0.02),
@@ -121,6 +124,7 @@ objects['rock'] = rock;
 let pizza = {
     objPath: './objs/pizza/pizza.obj',
     textureHtmlId: 'pizzaTexture',
+    normalHtmlId: 'pizzaNormal',
     vertexShader: 'pizza-vertex-shader',
     fragmentShader: 'pizza-fragment-shader',
     scale: scalem(1, 1, 1),
@@ -135,6 +139,7 @@ objects['pizza'] = pizza;
 let wooden_crate = {
     objPath: './objs/box/wooden crate.obj',
     textureHtmlId: 'woodenCrateTexture',
+    normalHtmlId: 'crateNormal',
     vertexShader: 'wooden_crate-vertex-shader',
     fragmentShader: 'wooden_crate-fragment-shader',
     scale: scalem(0.25, 0.25, 0.25),
@@ -225,26 +230,29 @@ function configureTextures(obj) {
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-    obj['normal'] = gl.createTexture();
-    obj['normalImage'] = document.getElementById(obj['normalHtmlId']);
-    gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.RGB,
-        gl.RGB,
-        gl.UNSIGNED_BYTE,
-        obj['textureImage']
-    );
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.texParameteri(
-        gl.TEXTURE_2D,
-        gl.TEXTURE_MIN_FILTER,
-        gl.NEAREST_MIPMAP_LINEAR
-    );
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    if (obj['normalHtmlId']) {
+        obj['normal'] = gl.createTexture();
+        obj['normalImage'] = document.getElementById(obj['normalHtmlId']);
+        gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGB,
+            gl.RGB,
+            gl.UNSIGNED_BYTE,
+            obj['normalImage']
+        );
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(
+            gl.TEXTURE_2D,
+            gl.TEXTURE_MIN_FILTER,
+            gl.NEAREST_MIPMAP_LINEAR
+        );
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);    
+    }
 
+   
 }
 
 function configureAdditionalTextures() {
@@ -426,9 +434,6 @@ function renderObject(obj) {
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
     gl.uniform1i(gl.getUniformLocation(obj['shader'], 'defaultTex'), 0);
 
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
-    gl.uniform1i(gl.getUniformLocation(obj['shader'], 'normalMap'), 0);
     // pass additional textures
     for (const [i, texture] of additionalTextures.entries()) {
         gl.activeTexture(texture['textureCode']);
@@ -437,7 +442,17 @@ function renderObject(obj) {
             gl.getUniformLocation(obj['shader'], texture['name']),
             i + 1
         );
+        if (obj['normalImage']) {
+            gl.activeTexture(texture['textureCode']);
+            gl.bindTexture(gl.TEXTURE_2D, texture['texture']);
+            gl.uniform1i(
+                gl.getUniformLocation(obj['shader'], texture['name']),
+                i + 5
+            );
+        }
     }
+
+    
 
     // pass current texture
     gl.uniform1i(obj['currentTextureLoc'], obj['currentTexture']);
@@ -625,6 +640,31 @@ window.onload = function init() {
             textureHtmlId: 'zebraTexture',
             textureCode: gl.TEXTURE6,
         },
+        {
+            name: 'box',
+            textureHtmlId: 'crateNormal',
+            textureCode: gl.TEXTURE7,
+        },
+        {
+            name: 'kitty',
+            textureHtmlId : 'kittyNormal',
+            textureCode : gl.TEXTURE8
+        },
+        {
+            name: 'pizza',
+            textureHtmlId : 'pizzaNormal',
+            textureCode : gl.TEXTURE9
+        },
+        {
+            name: 'puppy',
+            textureHtmlId : 'puppyNormal',
+            textureCode : gl.TEXTURE10
+        },
+        {
+            name: 'rock',
+            textureHtmlId : 'rockNormal',
+            textureCode : gl.TEXTURE11
+        }
     ];
 
     // set default html values
