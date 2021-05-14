@@ -98,8 +98,8 @@ let kitty = {
     objPath: './objs/kitty/kitty.obj',
     textureHtmlId: 'kittyTexture',
     normalHtmlId: 'kittyNormal',
-    vertexShader: 'kitty-vertex-shader',
-    fragmentShader: 'kitty-fragment-shader',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(0.015, 0.015, 0.015),
     translationVector: vec3(-0.5, 0.5, 0),
     rotateX: vec4(-10, 1, 0, 0),
@@ -113,8 +113,8 @@ let puppy = {
     objPath: './objs/puppy/Puppy.obj',
     textureHtmlId: 'puppyTexture',
     normalHtmlId: 'puppyNormal',
-    vertexShader: 'puppy-vertex-shader',
-    fragmentShader: 'puppy-fragment-shader',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(0.015, 0.015, 0.015),
     translationVector: vec3(0.5, 0.5, 0),
     rotateX: vec4(-10, 1, 0, 0),
@@ -142,8 +142,8 @@ let rock = {
     objPath: './objs/rock/rock.obj',
     textureHtmlId: 'rockTexture',
     normalHtmlId: 'rockNormal',
-    vertexShader: 'pumpkin-vertex-shader',
-    fragmentShader: 'pumpkin-fragment-shader',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(0.02, 0.02, 0.02),
     translationVector: vec3(-0.25, -0.5, 0),
     rotateX: vec4(0, 1, 0, 0),
@@ -157,8 +157,8 @@ let pizza = {
     objPath: './objs/pizza/pizza.obj',
     textureHtmlId: 'pizzaTexture',
     normalHtmlId: 'pizzaNormal',
-    vertexShader: 'pizza-vertex-shader',
-    fragmentShader: 'pizza-fragment-shader',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(1, 1, 1),
     translationVector: vec3(-0.75, 0.25, 0),
     rotateX: vec4(90, 1, 0, 0),
@@ -172,8 +172,8 @@ let wooden_crate = {
     objPath: './objs/box/wooden crate.obj',
     textureHtmlId: 'woodenCrateTexture',
     normalHtmlId: 'woodenCrateNormal',
-    vertexShader: 'wooden_crate-vertex-shader',
-    fragmentShader: 'wooden_crate-fragment-shader',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(0.25, 0.25, 0.25),
     translationVector: vec3(0.65, -0.25, 0),
     rotateX: vec4(0, 1, 0, 0),
@@ -442,7 +442,6 @@ function setupObjectShaderBuffers(obj) {
         obj['shader'],
         'shininessCoefficient'
     );
-
 }
 
 function renderObject(obj) {
@@ -490,7 +489,7 @@ function renderObject(obj) {
     // pass rotation
     gl.uniformMatrix4fv(obj['rotationLoc'], false, flatten(obj['rotation']));
 
-     // add light properties
+    // add light properties
     gl.uniform4fv(obj['lPositionLoc'], flatten(stationaryLightPosition));
     gl.uniform4fv(obj['lAmbientLoc'], flatten(light.ambient));
     gl.uniform4fv(obj['lDiffuseLoc'], flatten(light.diffuse));
