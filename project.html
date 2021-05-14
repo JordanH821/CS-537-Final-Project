@@ -283,6 +283,7 @@
             // camera properties
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
+            uniform vec3 eyePosition;
 
             // the stationary and camera light will
             // share the same parameters except position
@@ -308,7 +309,7 @@
             varying float fFogIntensity;
 
             // fragment pass vars
-            varying vec3 L, V, N;
+            varying vec3 L, V, N, H;
             varying vec4 flAmbient, flSpecular, flDiffuse;
             varying float fShininessCoefficient;
 
@@ -332,6 +333,9 @@
                 //check on later
                 V = -normalize(pos);
 
+                vec3 E = normalize(modelViewMatrix * translation * rotation * scale * vec4(eyePosition, 1.0)).xyz;
+    
+                H = normalize( L + E );
                 N = normalize(nPosition);
 
                 // pass light properties to fragment shader
@@ -364,7 +368,7 @@
             varying float fFogIntensity;
 
             //light vars
-            varying vec3 L, V, N;
+            varying vec3 L, V, N, H;
             varying vec4 flAmbient, flSpecular, flDiffuse;
             varying float fShininessCoefficient;
 

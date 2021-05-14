@@ -50,10 +50,11 @@ let sceneProperties = {
     aspect: aspectDefault,
     near: nearDefault,
     far: farDefault,
+    eyePosition: vec3(0.0, 0.0, -1),
     get projectionMatrix() {
         return perspective(this.fov, this.aspect, this.near, this.far);
     },
-    modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 0), vec3(0, 1, 0)),
+    get modelViewMatrix(){ return lookAt(this.eyePosition, vec3(0, 0, 0), vec3(0, 1, 0))},
     fogColor: vec4(0.8, 0.9, 1, 1),
     fogIntensity: fogIntensityDefault,
 };
@@ -268,7 +269,6 @@ function configureTextures(obj) {
         gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
         obj['normalImage'] = document.getElementById(obj['normalHtmlId']);
-        console.log(obj['normalImage']);
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,
@@ -393,6 +393,12 @@ function setupObjectShaderBuffers(obj) {
         gl.STATIC_DRAW
     );
 
+    // eye position location
+    obj['eyePositionLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'eyePositionLoc'
+    );
+
     // model view matrix location
     obj['modelViewMatrixLoc'] = gl.getUniformLocation(
         obj['shader'],
@@ -464,6 +470,11 @@ function renderObject(obj) {
     gl.enableVertexAttribArray(obj['nPosition']);
 
     // pass camera matrices
+    gl.uniform3fv(
+        obj['eyePositionLoc'],
+        flatten(sceneProperties.eyePosition)
+    );
+
     gl.uniformMatrix4fv(
         obj['modelViewMatrixLoc'],
         false,
@@ -513,7 +524,6 @@ function renderObject(obj) {
 
     // pass normal map
     if (obj['normalImage']) {
-        console.log('normal here');
         gl.activeTexture(gl.TEXTURE7);
         gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
         gl.uniform1i(gl.getUniformLocation(obj['shader'], 'normalMap'), 7);
