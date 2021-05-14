@@ -13,6 +13,10 @@ let objects = {};
 let defaults = {};
 let additionalTextures = {};
 
+function isPowerOf2(value) {
+    return (value & (value - 1)) == 0;
+}
+
 let sceneProperties = {
     fov: fovDefault,
     aspect: aspectDefault,
@@ -139,7 +143,7 @@ objects['pizza'] = pizza;
 let wooden_crate = {
     objPath: './objs/box/wooden crate.obj',
     textureHtmlId: 'woodenCrateTexture',
-    normalHtmlId: 'crateNormal',
+    normalHtmlId: 'woodenCrateNormal',
     vertexShader: 'wooden_crate-vertex-shader',
     fragmentShader: 'wooden_crate-fragment-shader',
     scale: scalem(0.25, 0.25, 0.25),
@@ -194,7 +198,7 @@ function getOrderedTextureCoordsFromObj(o) {
 function loadedObj(data) {
     const objectList = Object.values(objects);
     let obj = loadOBJFromBuffer(data);
-    
+
     let jsObj = objectList[currentObject];
     jsObj['indices'] = obj.i_verts;
     jsObj['vertices'] = obj.c_verts;
@@ -214,7 +218,7 @@ function configureTextures(obj) {
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     obj['textureImage'] = document.getElementById(obj['textureHtmlId']);
-    
+
     gl.texImage2D(
         gl.TEXTURE_2D,
         0,
@@ -231,13 +235,49 @@ function configureTextures(obj) {
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-   
+    if (obj['normalHtmlId']) {
+        obj['normal'] = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        obj['normalImage'] = document.getElementById(obj['normalHtmlId']);
+        console.log(obj['normalImage']);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGB,
+            gl.RGB,
+            gl.UNSIGNED_BYTE,
+            obj['normalImage']
+        );
+
+        //   https://stackoverflow.com/questions/57381386/what-is-the-mipmapping-and-power-of-two-error
+        if (
+            isPowerOf2(obj['normalImage'].width) &&
+            isPowerOf2(obj['normalImage'].height)
+        ) {
+            // Yes, it's a power of 2. Generate mips.
+            gl.generateMipmap(gl.TEXTURE_2D);
+        } else {
+            // No, it's not a power of 2. Turn off mips and set wrapping to clamp to edge
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_S,
+                gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(
+                gl.TEXTURE_2D,
+                gl.TEXTURE_WRAP_T,
+                gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        }
+    }
 }
 
 function configureAdditionalTextures() {
     // additional textures
     for (const texture of additionalTextures) {
-        if (texture['textureHtmlId']){
+        if (texture['textureHtmlId']) {
             texture['texture'] = gl.createTexture();
             gl.bindTexture(gl.TEXTURE_2D, texture['texture']);
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -252,9 +292,6 @@ function configureAdditionalTextures() {
                 gl.UNSIGNED_BYTE,
                 texture['textureImage']
             );
-            function isPowerOf2(value) {
-                return (value & (value - 1)) == 0;
-            }
             //   https://stackoverflow.com/questions/57381386/what-is-the-mipmapping-and-power-of-two-error
             if (
                 isPowerOf2(texture['textureImage'].width) &&
@@ -274,22 +311,19 @@ function configureAdditionalTextures() {
                     gl.TEXTURE_WRAP_T,
                     gl.CLAMP_TO_EDGE
                 );
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_MIN_FILTER,
+                    gl.LINEAR
+                );
             }
         }
-        else if (texture['normalHtmlId']) {
-            texture['normal'] = gl.createTexture();
-            gl.bindTexture(gl.TEXTURE_2D, texture['normal']);
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-            texture['normalImage'] = document.getElementById('normalHtmlId');
-        }
-        
     }
 }
 
 function setupObjectShaderBuffers(obj) {
     // init shaders
-    
+
     obj['shader'] = initShaders(gl, obj['vertexShader'], obj['fragmentShader']);
 
     // use shaders
@@ -391,7 +425,7 @@ function renderObject(obj) {
     gl.bindBuffer(gl.ARRAY_BUFFER, obj['normalBuffer']);
     gl.vertexAttribPointer(obj['nPosition'], 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(obj['nPosition']);
-    
+
     // pass camera matrices
     gl.uniformMatrix4fv(
         obj['modelViewMatrixLoc'],
@@ -431,17 +465,15 @@ function renderObject(obj) {
             gl.getUniformLocation(obj['shader'], texture['name']),
             i + 1
         );
-        if (obj['normalImage']) {
-            console.log("normal here");
-            gl.activeTexture(texture['textureCode']);
-            gl.bindTexture(gl.TEXTURE_2D, texture['texture']);
-            gl.uniform1i(
-                gl.getUniformLocation(obj['shader'], texture['name']),
-                i + 4
-            );
-        }
     }
-    
+
+    // pass normal map
+    if (obj['normalImage']) {
+        console.log('normal here');
+        gl.activeTexture(gl.TEXTURE7);
+        gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
+        gl.uniform1i(gl.getUniformLocation(obj['shader'], 'normalMap'), 7);
+    }
 
     // pass current texture
     gl.uniform1i(obj['currentTextureLoc'], obj['currentTexture']);
@@ -629,31 +661,6 @@ window.onload = function init() {
             textureHtmlId: 'zebraTexture',
             textureCode: gl.TEXTURE6,
         },
-        {
-            name: 'box',
-            normalHtmlId: 'crateNormal',
-            textureCode: gl.TEXTURE7,
-        },
-        {
-            name: 'kitty',
-            normalHtmlId : 'kittyNormal',
-            textureCode : gl.TEXTURE8
-        },
-        {
-            name: 'pizza',
-            normalHtmlId : 'pizzaNormal',
-            textureCode : gl.TEXTURE9
-        },
-        {
-            name: 'puppy',
-            normalHtmlId : 'puppyNormal',
-            textureCode : gl.TEXTURE10
-        },
-        {
-            name: 'rock',
-            normalHtmlId : 'rockNormal',
-            textureCode : gl.TEXTURE11
-        }
     ];
 
     // set default html values

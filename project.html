@@ -202,8 +202,6 @@
             attribute vec4 vPosition;
             attribute vec2 tPosition;
 
-            attribute vec3 nPosition;
-
             // camera properties
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
@@ -222,18 +220,15 @@
             varying vec4 fFogColor;
             varying float fFogIntensity;
 
-            varying vec3 normCoord;
 
 
             void main()
             {
                 // pass texture texture coord
                 fTexCoord = tPosition;
-                normCoord = normalize(nPosition);
-
                 fFogColor = fogColor;
                 fFogIntensity = fogIntensity;
-                
+
                 gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
             }
         </script>
@@ -255,22 +250,15 @@
             uniform sampler2D zebra;
             uniform int currentTexture;
 
-            // normal var
-            varying vec3 normCoord;
-
             // fog vars
             varying vec4 fFogColor;
             varying float fFogIntensity;
 
-            struct Out {
-                vec3 fragPos;
-                vec2 texCoords;
-                mat3 TBN;
-            };
-
-
             void main()
             {
+                vec3 normal = texture2D(normalMap, fTexCoord).rgb;
+                normal = normalize(normal * 2.0 - 1.0);
+
                 if(currentTexture == 0){
                     gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
                 } else if(currentTexture == 1){
@@ -306,8 +294,7 @@
             uniform mat4 rotation;
 
             // vars to pass to fragment shader
-            
-            varying vec3 normCoord;
+
             // fog properties
             uniform vec4 fogColor;
             uniform float fogIntensity;
@@ -321,8 +308,7 @@
             {
                 // pass texture texture coord
                 fTexCoord = tPosition;
-                normCoord = normalize(nPosition);
-                
+
                 fFogColor = fogColor;
                 fFogIntensity = fogIntensity;
 
@@ -331,14 +317,13 @@
         </script>
 
     <script id="pumpkin-fragment-shader" type="x-shader/x-fragment">
-            
+
 
                 precision mediump float;
 
                 // texture vars
                 varying vec2 fTexCoord;
-                varying vec2 normCoord;
-                uniform sampler2D defaultTex; 
+                uniform sampler2D defaultTex;
                 uniform sampler2D normalMap;
             uniform sampler2D boat;
             uniform sampler2D camo;
@@ -397,13 +382,11 @@
             varying vec2 fTexCoord;
             varying vec4 fFogColor;
             varying float fFogIntensity;
-            varying vec3 normCoord;
 
             void main()
             {
                 // pass texture texture coord
                 fTexCoord = tPosition;
-                normCoord = normalize(nPosition);
                 fFogColor = fogColor;
                 fFogIntensity = fogIntensity;
 
@@ -432,7 +415,7 @@
 
             void main()
             {
-                
+
 
                 if(currentTexture == 0){
                     gl_FragColor =  mix(texture2D( defaultTex, fTexCoord ), fFogColor, fFogIntensity);
@@ -477,12 +460,10 @@
             varying vec4 fFogColor;
             varying float fFogIntensity;
 
-            varying vec3 normCoord;
             void main()
             {
                 // pass texture texture coord
                 fTexCoord = tPosition;
-                normCoord = normalize(nPosition);
 
                 fFogColor = fogColor;
                 fFogIntensity = fogIntensity;
@@ -553,13 +534,10 @@
             varying vec4 fFogColor;
             varying float fFogIntensity;
 
-            varying vec3 normCoord;
-
             void main()
             {
                 // pass texture texture coord
                 fTexCoord = tPosition;
-                normCoord = normalize(nPosition);
                 fFogColor = fogColor;
                 fFogIntensity = fogIntensity;
 
@@ -630,13 +608,10 @@
             varying vec4 fFogColor;
             varying float fFogIntensity;
 
-            varying vec3 normCoord;
-
             void main()
             {
                 // pass texture texture coord
                 fTexCoord = tPosition;
-                normCoord = normalize(nPosition);
                 fFogColor = fogColor;
                 fFogIntensity = fogIntensity;
 
@@ -720,7 +695,11 @@
 
     <img alt="pizzaTexture" id="pizzaTexture" src="./objs/pizza/PIZZA_TEXTURES/1k/pizza_5k_BaseColor_1k.jpg" hidden />
 
+    <img alt="pizzaNormal" id="pizzaNormal" src="./objs/pizza/PIZZA_TEXTURES/1k/pizza_5k_Normal_1k.jpg" hidden />
+
     <img alt="woodenCrateTexture" id="woodenCrateTexture" src="./objs/box/crate_BaseColor.png" hidden />
+
+    <img alt="woodenCrateNormal" id="woodenCrateNormal" src="./objs/box/crate_Normal.png" hidden />
 
     <!-- Additional Textures -->
     <img alt="boat" id="boatTexture" src="./textures/boat.jpg" hidden />
