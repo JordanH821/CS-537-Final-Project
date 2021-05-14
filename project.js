@@ -13,6 +13,34 @@ let objects = {};
 let defaults = {};
 let additionalTextures = {};
 
+// ellipse properties
+var cameraPositionIndex = 0;
+var majorAxis = 10;
+var minorAxis = 7;
+
+// ellipse range HTML elements
+var majorAxisRangeElement;
+var minorAxisRangeElement;
+
+// light constants
+var diffuseConstant = 0.9;
+var specularConstant = 0.9;
+var ambientConstant = 0.1;
+var stationaryLightPosition = vec4(0.0, 0.0, 0.0, 1.0);
+
+// material constants
+var shininessCoefficient = 100;
+
+// light properties
+var light = {
+    // OFFICE HOURS: Do we need this?
+    color: vec3(1.0, 1.0, 1.0),
+    // OFFICE HOURS: Should this be zero vector, since it is a point light?
+    ambient: vec4(ambientConstant, ambientConstant, ambientConstant, 1.0),
+    diffuse: vec4(diffuseConstant, diffuseConstant, diffuseConstant, 1.0),
+    specular: vec4(specularConstant, specularConstant, specularConstant, 1.0),
+};
+
 function isPowerOf2(value) {
     return (value & (value - 1)) == 0;
 }
@@ -405,6 +433,16 @@ function setupObjectShaderBuffers(obj) {
         obj['shader'],
         'currentTexture'
     );
+
+    obj['lPositionLoc'] = gl.getUniformLocation(obj['shader'], 'lPosition');
+    obj['lAmbientLoc'] = gl.getUniformLocation(obj['shader'], 'lAmbient');
+    obj['lDiffuseLoc'] = gl.getUniformLocation(obj['shader'], 'lDiffuse');
+    obj['lSpecularLoc'] = gl.getUniformLocation(obj['shader'], 'lSpecular');
+    obj['shininessCoefficientLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'shininessCoefficient'
+    );
+
 }
 
 function renderObject(obj) {
@@ -452,6 +490,13 @@ function renderObject(obj) {
     // pass rotation
     gl.uniformMatrix4fv(obj['rotationLoc'], false, flatten(obj['rotation']));
 
+     // add light properties
+    gl.uniform4fv(obj['lPositionLoc'], flatten(stationaryLightPosition));
+    gl.uniform4fv(obj['lAmbientLoc'], flatten(light.ambient));
+    gl.uniform4fv(obj['lDiffuseLoc'], flatten(light.diffuse));
+    gl.uniform4fv(obj['lSpecularLoc'], flatten(light.specular));
+    gl.uniform1f(obj['shininessCoefficientLoc'], shininessCoefficient);
+
     // pass default texture
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
@@ -483,6 +528,26 @@ function renderObject(obj) {
     gl.uniform1f(obj['fogIntensityLoc'], sceneProperties.fogIntensity);
 
     gl.drawElements(gl.TRIANGLES, obj['numVerts'], gl.UNSIGNED_SHORT, 0);
+}
+
+var circlePoints = [];
+var circleNormal;
+function ellipse() {
+    // reset ellipse for changes in axes
+    cameraPositionIndex = 0;
+    circlePoints = [];
+
+    let u = vec3(0, 0, 1);
+    let v = vec3(1 / Math.sqrt(2), 1 / Math.sqrt(2), 0);
+    for (let deg = 0; deg < 360; deg += 2) {
+        let point = add(
+            scale(majorAxis * Math.cos(radians(deg)), u),
+            scale(minorAxis * Math.sin(radians(deg)), v)
+        );
+        circlePoints.push(point);
+    }
+    // normalize
+    circleNormal = normalize(cross(u, v));
 }
 
 function setupAfterDataLoad() {
@@ -628,6 +693,8 @@ window.onload = function init() {
     gl.viewport(0, 0, canvas.width, canvas.height);
     aspect = canvas.width / canvas.height;
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
+
+    ellipse();
 
     // set up additional textures
     additionalTextures = [
