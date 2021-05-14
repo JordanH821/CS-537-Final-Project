@@ -26,7 +26,7 @@ var minorAxisRangeElement;
 var diffuseConstant = 0.9;
 var specularConstant = 0.9;
 var ambientConstant = 0.1;
-var stationaryLightPosition = vec4(0.0, 0.0, 0.0, 1.0);
+var stationaryLightPosition = vec4(0.0, 0.0, -5, 1.0);
 
 // material constants
 var shininessCoefficient = 100;
@@ -53,7 +53,8 @@ let sceneProperties = {
     get projectionMatrix() {
         return perspective(this.fov, this.aspect, this.near, this.far);
     },
-    modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 0), vec3(0, 1, 0)),
+    // lookAt( eye, at, up )
+    modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 1), vec3(0, 1, 0)),
     fogColor: vec4(0.8, 0.9, 1, 1),
     fogIntensity: fogIntensityDefault,
 };

@@ -322,17 +322,24 @@
                 gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
 
                 // get the position of this vertex
-                vec3 pos = (modelViewMatrix * vPosition).xyz;
+                vec3 pos = normalize(modelViewMatrix * translation * rotation * scale * vPosition).xyz;
 
-                // slPositionLoc is null without this
-                vec4 slPos = modelViewMatrix * lPosition;
+                // L is the vector from vertex to point light
+                // OFFICE HOURS:
+                //    - Is this correct for light at (0,0, -1) or (0,0,-2)?
+                //    - Is does the lPosition need to be modified by the modelViewMatrix?
+                L = normalize(lPosition.xyz - pos);
 
-                //pass positional vectors
-                L = normalize(slPos.xyz - pos);
-                //check on later
+                // V is the viewing direction vector
+                // OFFICE HOURS:
+                //    - Is this just the negation of the L for a light at the camera?
+                //    - For the "sun light"?
                 V = -normalize(pos);
 
-                N = normalize(nPosition);
+                // N is the vertex normal
+                // OFFICE HOURS: Does this need to be modified by the translation, rotation, scale matrices?
+                // OFFICE HOURS: Does the w component need to be 1.0 or 0.0? Point vs Vector?
+                N = normalize(modelViewMatrix * translation * rotation * scale * vec4(nPosition, 1.0)).xyz;
 
                 // pass light properties to fragment shader
                 fTexCoord = tPosition;
@@ -370,9 +377,6 @@
 
             void main()
             {
-                /*vec3 N = texture2D(normalMap, fTexCoord).rgb;
-                N = normalize(N * 2.0 - 1.0);*/
-
                 vec4 textureRGB;
 
                 if(currentTexture == 0){
@@ -405,7 +409,7 @@
 
                 // specular light component
                 vec3 R = normalize(reflect(L, N));
-                vec4 Iss = flSpecular * pow(dot(R,V), fShininessCoefficient);
+                vec4 Iss = flSpecular * pow(max(dot(R,V), 0.0), fShininessCoefficient);
                 if( dot(L, N) < 0.0 ) {
                     Iss = vec4(0.0, 0.0, 0.0, 1.0);
                 }
