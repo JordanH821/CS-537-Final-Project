@@ -13,6 +13,38 @@ let objects = {};
 let defaults = {};
 let additionalTextures = {};
 
+// ellipse properties
+var cameraPositionIndex = 0;
+var majorAxis = 10;
+var minorAxis = 7;
+
+// ellipse range HTML elements
+var majorAxisRangeElement;
+var minorAxisRangeElement;
+
+// light constants
+var diffuseConstant = 0.9;
+var specularConstant = 0.9;
+var ambientConstant = 0.1;
+var stationaryLightPosition = vec4(0.0, 100, -100, 1.0);
+
+// material constants
+var shininessCoefficient = 100;
+
+// light properties
+var light = {
+    // OFFICE HOURS: Do we need this?
+    color: vec3(1.0, 1.0, 1.0),
+    // OFFICE HOURS: Should this be zero vector, since it is a point light?
+    ambient: vec4(ambientConstant, ambientConstant, ambientConstant, 1.0),
+    diffuse: vec4(diffuseConstant, diffuseConstant, diffuseConstant, 1.0),
+    specular: vec4(specularConstant, specularConstant, specularConstant, 1.0),
+};
+
+function isPowerOf2(value) {
+    return (value & (value - 1)) == 0;
+}
+
 let sceneProperties = {
     fov: fovDefault,
     aspect: aspectDefault,
@@ -21,7 +53,8 @@ let sceneProperties = {
     get projectionMatrix() {
         return perspective(this.fov, this.aspect, this.near, this.far);
     },
-    modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 0), vec3(0, 1, 0)),
+    // lookAt( eye, at, up )
+    modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 1), vec3(0, 1, 0)),
     fogColor: vec4(0.8, 0.9, 1, 1),
     fogIntensity: fogIntensityDefault,
 };
@@ -49,6 +82,16 @@ const rotationGetter = {
     },
 };
 
+const normalMatrixGetter = {
+    get: function () {
+        let worldView = mult(
+            mult(sceneProperties.modelViewMatrix, this.rotation),
+            this.translation
+        );
+        return normalMatrix(worldView, true);
+    },
+};
+
 function deepCopy(src) {
     let copy = {};
     for (const [key, val] of Object.entries(src)) {
@@ -65,8 +108,9 @@ function deepCopy(src) {
 let kitty = {
     objPath: './objs/kitty/kitty.obj',
     textureHtmlId: 'kittyTexture',
-    vertexShader: 'kitty-vertex-shader',
-    fragmentShader: 'kitty-fragment-shader',
+    normalHtmlId: 'kittyNormal',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(0.015, 0.015, 0.015),
     translationVector: vec3(-0.5, 0.5, 0),
     rotateX: vec4(-10, 1, 0, 0),
@@ -79,8 +123,9 @@ objects['kitty'] = kitty;
 let puppy = {
     objPath: './objs/puppy/Puppy.obj',
     textureHtmlId: 'puppyTexture',
-    vertexShader: 'puppy-vertex-shader',
-    fragmentShader: 'puppy-fragment-shader',
+    normalHtmlId: 'puppyNormal',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(0.015, 0.015, 0.015),
     translationVector: vec3(0.5, 0.5, 0),
     rotateX: vec4(-10, 1, 0, 0),
@@ -102,13 +147,14 @@ let pumpkin = {
     rotateZ: vec4(0, 0, 0, 1),
     isRendering: true,
 };
-objects['pumpkin'] = pumpkin;
+// objects['pumpkin'] = pumpkin;
 
 let rock = {
     objPath: './objs/rock/rock.obj',
     textureHtmlId: 'rockTexture',
-    vertexShader: 'pumpkin-vertex-shader',
-    fragmentShader: 'pumpkin-fragment-shader',
+    normalHtmlId: 'rockNormal',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(0.02, 0.02, 0.02),
     translationVector: vec3(-0.25, -0.5, 0),
     rotateX: vec4(0, 1, 0, 0),
@@ -121,8 +167,9 @@ objects['rock'] = rock;
 let pizza = {
     objPath: './objs/pizza/pizza.obj',
     textureHtmlId: 'pizzaTexture',
-    vertexShader: 'pizza-vertex-shader',
-    fragmentShader: 'pizza-fragment-shader',
+    normalHtmlId: 'pizzaNormal',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(1, 1, 1),
     translationVector: vec3(-0.75, 0.25, 0),
     rotateX: vec4(90, 1, 0, 0),
@@ -135,8 +182,9 @@ objects['pizza'] = pizza;
 let wooden_crate = {
     objPath: './objs/box/wooden crate.obj',
     textureHtmlId: 'woodenCrateTexture',
-    vertexShader: 'wooden_crate-vertex-shader',
-    fragmentShader: 'wooden_crate-fragment-shader',
+    normalHtmlId: 'woodenCrateNormal',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(0.25, 0.25, 0.25),
     translationVector: vec3(0.65, -0.25, 0),
     rotateX: vec4(0, 1, 0, 0),
@@ -149,6 +197,7 @@ objects['wooden_crate'] = wooden_crate;
 for (const [name, obj] of Object.entries(objects)) {
     Object.defineProperty(obj, 'translation', translationGetter);
     Object.defineProperty(obj, 'rotation', rotationGetter);
+    Object.defineProperty(obj, 'normalMatrix', normalMatrixGetter);
     defaults[name] = deepCopy(obj);
     obj['currentTexture'] = 0;
 }
@@ -189,6 +238,7 @@ function getOrderedTextureCoordsFromObj(o) {
 function loadedObj(data) {
     const objectList = Object.values(objects);
     let obj = loadOBJFromBuffer(data);
+
     let jsObj = objectList[currentObject];
     jsObj['indices'] = obj.i_verts;
     jsObj['vertices'] = obj.c_verts;
@@ -208,6 +258,7 @@ function configureTextures(obj) {
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     obj['textureImage'] = document.getElementById(obj['textureHtmlId']);
+
     gl.texImage2D(
         gl.TEXTURE_2D,
         0,
@@ -223,32 +274,25 @@ function configureTextures(obj) {
         gl.NEAREST_MIPMAP_LINEAR
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-}
 
-function configureAdditionalTextures() {
-    // additional textures
-    for (const texture of additionalTextures) {
-        texture['texture'] = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, texture['texture']);
+    if (obj['normalHtmlId']) {
+        obj['normal'] = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        texture['textureImage'] = document.getElementById(
-            texture['textureHtmlId']
-        );
+        obj['normalImage'] = document.getElementById(obj['normalHtmlId']);
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,
             gl.RGB,
             gl.RGB,
             gl.UNSIGNED_BYTE,
-            texture['textureImage']
+            obj['normalImage']
         );
-        function isPowerOf2(value) {
-            return (value & (value - 1)) == 0;
-        }
+
         //   https://stackoverflow.com/questions/57381386/what-is-the-mipmapping-and-power-of-two-error
         if (
-            isPowerOf2(texture['textureImage'].width) &&
-            isPowerOf2(texture['textureImage'].height)
+            isPowerOf2(obj['normalImage'].width) &&
+            isPowerOf2(obj['normalImage'].height)
         ) {
             // Yes, it's a power of 2. Generate mips.
             gl.generateMipmap(gl.TEXTURE_2D);
@@ -269,8 +313,56 @@ function configureAdditionalTextures() {
     }
 }
 
+function configureAdditionalTextures() {
+    // additional textures
+    for (const texture of additionalTextures) {
+        if (texture['textureHtmlId']) {
+            texture['texture'] = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, texture['texture']);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+            texture['textureImage'] = document.getElementById(
+                texture['textureHtmlId']
+            );
+            gl.texImage2D(
+                gl.TEXTURE_2D,
+                0,
+                gl.RGB,
+                gl.RGB,
+                gl.UNSIGNED_BYTE,
+                texture['textureImage']
+            );
+            //   https://stackoverflow.com/questions/57381386/what-is-the-mipmapping-and-power-of-two-error
+            if (
+                isPowerOf2(texture['textureImage'].width) &&
+                isPowerOf2(texture['textureImage'].height)
+            ) {
+                // Yes, it's a power of 2. Generate mips.
+                gl.generateMipmap(gl.TEXTURE_2D);
+            } else {
+                // No, it's not a power of 2. Turn off mips and set wrapping to clamp to edge
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_WRAP_S,
+                    gl.CLAMP_TO_EDGE
+                );
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_WRAP_T,
+                    gl.CLAMP_TO_EDGE
+                );
+                gl.texParameteri(
+                    gl.TEXTURE_2D,
+                    gl.TEXTURE_MIN_FILTER,
+                    gl.LINEAR
+                );
+            }
+        }
+    }
+}
+
 function setupObjectShaderBuffers(obj) {
     // init shaders
+
     obj['shader'] = initShaders(gl, obj['vertexShader'], obj['fragmentShader']);
 
     // use shaders
@@ -303,6 +395,15 @@ function setupObjectShaderBuffers(obj) {
         gl.STATIC_DRAW
     );
 
+    // normal buffer
+    obj['normalBuffer'] = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['normalBuffer']);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(obj['normals']),
+        gl.STATIC_DRAW
+    );
+
     // model view matrix location
     obj['modelViewMatrixLoc'] = gl.getUniformLocation(
         obj['shader'],
@@ -330,6 +431,15 @@ function setupObjectShaderBuffers(obj) {
     // texture coord
     obj['tPosition'] = gl.getAttribLocation(obj['shader'], 'tPosition');
 
+    // normal texture
+    obj['nPosition'] = gl.getAttribLocation(obj['shader'], 'nPosition');
+
+    // normal matrix
+    obj['normalMatrixLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'normalMatrix'
+    );
+
     // fog properties
     obj['fogColorLoc'] = gl.getUniformLocation(obj['shader'], 'fogColor');
     obj['fogIntensityLoc'] = gl.getUniformLocation(
@@ -340,6 +450,15 @@ function setupObjectShaderBuffers(obj) {
     obj['currentTextureLoc'] = gl.getUniformLocation(
         obj['shader'],
         'currentTexture'
+    );
+
+    obj['lPositionLoc'] = gl.getUniformLocation(obj['shader'], 'lPosition');
+    obj['lAmbientLoc'] = gl.getUniformLocation(obj['shader'], 'lAmbient');
+    obj['lDiffuseLoc'] = gl.getUniformLocation(obj['shader'], 'lDiffuse');
+    obj['lSpecularLoc'] = gl.getUniformLocation(obj['shader'], 'lSpecular');
+    obj['shininessCoefficientLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'shininessCoefficient'
     );
 }
 
@@ -356,6 +475,11 @@ function renderObject(obj) {
     gl.bindBuffer(gl.ARRAY_BUFFER, obj['textureBuffer']);
     gl.vertexAttribPointer(obj['tPosition'], 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(obj['tPosition']);
+
+    // pass normal coords
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['normalBuffer']);
+    gl.vertexAttribPointer(obj['nPosition'], 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(obj['nPosition']);
 
     // pass camera matrices
     gl.uniformMatrix4fv(
@@ -383,6 +507,13 @@ function renderObject(obj) {
     // pass rotation
     gl.uniformMatrix4fv(obj['rotationLoc'], false, flatten(obj['rotation']));
 
+    // add light properties
+    gl.uniform4fv(obj['lPositionLoc'], flatten(stationaryLightPosition));
+    gl.uniform4fv(obj['lAmbientLoc'], flatten(light.ambient));
+    gl.uniform4fv(obj['lDiffuseLoc'], flatten(light.diffuse));
+    gl.uniform4fv(obj['lSpecularLoc'], flatten(light.specular));
+    gl.uniform1f(obj['shininessCoefficientLoc'], shininessCoefficient);
+
     // pass default texture
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, obj['texture']);
@@ -398,6 +529,20 @@ function renderObject(obj) {
         );
     }
 
+    // pass normal map
+    if (obj['normalImage']) {
+        gl.activeTexture(gl.TEXTURE7);
+        gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
+        gl.uniform1i(gl.getUniformLocation(obj['shader'], 'normalMap'), 7);
+    }
+
+    // pass normal matrix
+    gl.uniformMatrix3fv(
+        obj['normalMatrixLoc'],
+        false,
+        flatten(obj['normalMatrix'])
+    );
+
     // pass current texture
     gl.uniform1i(obj['currentTextureLoc'], obj['currentTexture']);
 
@@ -406,6 +551,26 @@ function renderObject(obj) {
     gl.uniform1f(obj['fogIntensityLoc'], sceneProperties.fogIntensity);
 
     gl.drawElements(gl.TRIANGLES, obj['numVerts'], gl.UNSIGNED_SHORT, 0);
+}
+
+var circlePoints = [];
+var circleNormal;
+function ellipse() {
+    // reset ellipse for changes in axes
+    cameraPositionIndex = 0;
+    circlePoints = [];
+
+    let u = vec3(0, 0, 1);
+    let v = vec3(1 / Math.sqrt(2), 1 / Math.sqrt(2), 0);
+    for (let deg = 0; deg < 360; deg += 2) {
+        let point = add(
+            scale(majorAxis * Math.cos(radians(deg)), u),
+            scale(minorAxis * Math.sin(radians(deg)), v)
+        );
+        circlePoints.push(point);
+    }
+    // normalize
+    circleNormal = normalize(cross(u, v));
 }
 
 function setupAfterDataLoad() {
@@ -551,6 +716,8 @@ window.onload = function init() {
     gl.viewport(0, 0, canvas.width, canvas.height);
     aspect = canvas.width / canvas.height;
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
+
+    ellipse();
 
     // set up additional textures
     additionalTextures = [
