@@ -26,7 +26,7 @@ var minorAxisRangeElement;
 var diffuseConstant = 0.9;
 var specularConstant = 0.9;
 var ambientConstant = 0.1;
-var stationaryLightPosition = vec4(0.0, 0.0, 0.0, 1.0);
+var stationaryLightPosition = vec4(0.0, 100, -100, 1.0);
 
 // material constants
 var shininessCoefficient = 100;
@@ -53,7 +53,8 @@ let sceneProperties = {
     get projectionMatrix() {
         return perspective(this.fov, this.aspect, this.near, this.far);
     },
-    modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 0), vec3(0, 1, 0)),
+    // lookAt( eye, at, up )
+    modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 1), vec3(0, 1, 0)),
     fogColor: vec4(0.8, 0.9, 1, 1),
     fogIntensity: fogIntensityDefault,
 };
@@ -78,6 +79,16 @@ const translationGetter = {
 const rotationGetter = {
     get: function () {
         return getCombinedRotation(this.rotateX, this.rotateY, this.rotateZ);
+    },
+};
+
+const normalMatrixGetter = {
+    get: function () {
+        let worldView = mult(
+            mult(sceneProperties.modelViewMatrix, this.rotation),
+            this.translation
+        );
+        return normalMatrix(worldView, true);
     },
 };
 
@@ -136,7 +147,7 @@ let pumpkin = {
     rotateZ: vec4(0, 0, 0, 1),
     isRendering: true,
 };
-objects['pumpkin'] = pumpkin;
+// objects['pumpkin'] = pumpkin;
 
 let rock = {
     objPath: './objs/rock/rock.obj',
@@ -186,6 +197,7 @@ objects['wooden_crate'] = wooden_crate;
 for (const [name, obj] of Object.entries(objects)) {
     Object.defineProperty(obj, 'translation', translationGetter);
     Object.defineProperty(obj, 'rotation', rotationGetter);
+    Object.defineProperty(obj, 'normalMatrix', normalMatrixGetter);
     defaults[name] = deepCopy(obj);
     obj['currentTexture'] = 0;
 }
@@ -268,7 +280,6 @@ function configureTextures(obj) {
         gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
         obj['normalImage'] = document.getElementById(obj['normalHtmlId']);
-        console.log(obj['normalImage']);
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,
@@ -422,6 +433,13 @@ function setupObjectShaderBuffers(obj) {
 
     // normal texture
     obj['nPosition'] = gl.getAttribLocation(obj['shader'], 'nPosition');
+
+    // normal matrix
+    obj['normalMatrixLoc'] = gl.getUniformLocation(
+        obj['shader'],
+        'normalMatrix'
+    );
+
     // fog properties
     obj['fogColorLoc'] = gl.getUniformLocation(obj['shader'], 'fogColor');
     obj['fogIntensityLoc'] = gl.getUniformLocation(
@@ -513,11 +531,17 @@ function renderObject(obj) {
 
     // pass normal map
     if (obj['normalImage']) {
-        console.log('normal here');
         gl.activeTexture(gl.TEXTURE7);
         gl.bindTexture(gl.TEXTURE_2D, obj['normal']);
         gl.uniform1i(gl.getUniformLocation(obj['shader'], 'normalMap'), 7);
     }
+
+    // pass normal matrix
+    gl.uniformMatrix3fv(
+        obj['normalMatrixLoc'],
+        false,
+        flatten(obj['normalMatrix'])
+    );
 
     // pass current texture
     gl.uniform1i(obj['currentTextureLoc'], obj['currentTexture']);

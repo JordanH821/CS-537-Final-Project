@@ -1,278 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>CS-537 Final Project</title>
-        <meta charset="UTF-8" />
-        <script
-            src="https://code.jquery.com/jquery-3.6.0.min.js"
-            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-            crossorigin="anonymous"
-        ></script>
-    </head>
 
-    <body>
-        <div class="container">
-            <h1>CS-537 Final Project</h1>
+<head>
+    <title>CS-537 Final Project</title>
+    <meta charset="UTF-8" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+</head>
 
-            <div>
-                <span>Jordan Handwerger</span>
-                <span>Jack Brummer</span>
-                <span>Tyler Sulsenti</span>
-            </div>
+<body>
+    <div class="container">
+        <h1>CS-537 Final Project</h1>
 
-            <canvas id="gl-canvas" width="512" height="512">
-                Oops ... your browser doesn't support the HTML5 canvas element
-            </canvas>
+        <div>
+            <span>Jordan Handwerger</span>
+            <span>Jack Brummer</span>
+            <span>Tyler Sulsenti</span>
         </div>
 
-        <div class="container justify-content-center">
-            <div class="row justify-content-center">
-                <h2>Customization</h2>
-            </div>
-            <div class="row">
-                <h3>Scene Modifications</h3>
-                <button type="button" id="restoreSceneProperties">
-                    Restore Scene Properties
-                </button>
-            </div>
-            <div class="row">
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
-                    <div class="form-check">
-                        <label for="ambient"> Ambient Light </label>
-                        <br />
-                        <div>
-                            <small>Intensity</small>
-                            <input
-                                id="ambientIntensity"
-                                type="range"
-                                min="0"
-                                max="100"
-                                step="10"
-                                value="50"
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
-                    <div class="form-check">
-                        <label for="sun"> Sun Point Light </label>
-                        <br />
-                        <div>
-                            <small>Intensity</small>
-                            <input
-                                id="sunIntensity"
-                                type="range"
-                                min="0"
-                                max="100"
-                                step="10"
-                                value="50"
-                            />
-                        </div>
-                        <label for="sunTime">Time of Day:</label>
-                        <input type="time" id="sunTime" name="sunTime" />
-                    </div>
-                </div>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
-                    <div class="form-check">
-                        <label for="sun"> Fog </label>
-                        <br />
-                        <div>
-                            <small>Intensity (0.0 - 1.0)</small>
-                            <input
-                                id="fogIntensity"
-                                type="range"
-                                min="0.0"
-                                max="1.0"
-                                step=".01"
-                                value="0"
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
-                    <div class="form-check">
-                        <label for="projection"> Projection properties </label>
-                        <div class="row">
-                            <small>FOV (90 - 180 degrees)</small>
-                            <input
-                                id="fov"
-                                type="range"
-                                min="90"
-                                max="180"
-                                step="5"
-                                value="135"
-                            />
-                        </div>
-                        <div class="row">
-                            <small>Near (0.01 - 2.0)</small>
-                            <input
-                                id="near"
-                                type="range"
-                                min="0.01"
-                                max="2.0"
-                                step=".01"
-                                value=".01"
-                            />
-                        </div>
-                        <div class="row">
-                            <small>Far (0.01 - 10.0)</small>
-                            <input
-                                id="far"
-                                type="range"
-                                min="0.01"
-                                max="10.0"
-                                step=".01"
-                                value="5.0"
-                            />
-                        </div>
+        <canvas id="gl-canvas" width="512" height="512">
+            Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+    </div>
+
+    <div class="container justify-content-center">
+        <div class="row justify-content-center">
+            <h2>Customization</h2>
+        </div>
+        <div class="row">
+            <h3>Scene Modifications</h3>
+            <button type="button" id="restoreSceneProperties">
+                Restore Scene Properties
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <div class="form-check">
+                    <label for="ambient"> Ambient Light </label>
+                    <br />
+                    <div>
+                        <small>Intensity</small>
+                        <input id="ambientIntensity" type="range" min="0" max="100" step="10" value="50" />
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <h3>Object Modifications</h3>
-                <button type="button" id="restoreObject">
-                    Restore Object Defaults
-                </button>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <div class="form-check">
+                    <label for="sun"> Sun Point Light </label>
+                    <br />
+                    <div>
+                        <small>Intensity</small>
+                        <input id="sunIntensity" type="range" min="0" max="100" step="10" value="50" />
+                    </div>
+                    <label for="sunTime">Time of Day:</label>
+                    <input type="time" id="sunTime" name="sunTime" />
+                </div>
             </div>
-            <div class="row">
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <div class="form-check">
+                    <label for="sun"> Fog </label>
                     <br />
-                    <label for="object">Choose an object:</label>
-                    <br />
-                    <select name="object" id="objectSelect">
-                        <option value="kitty">Kitty</option>
-                        <option value="pumpkin">Pumpkin</option>
-                        <option value="puppy">Puppy</option>
-                        <option value="rock">Rock</option>
-                        <option value="pizza">Pizza</option>
-                        <option value="wooden_crate">Wooden Crate</option>
-                    </select>
-                    <br />
-                    <br />
-                    <label for="texture">Choose a texture:</label>
-                    <br />
-                    <select name="texture" id="textureSelect">
-                        <option value="0">Default</option>
-                        <option value="1">Boat</option>
-                        <option value="2">Camo</option>
-                        <option value="3">Stone</option>
-                        <option value="4">Tiger</option>
-                        <option value="5">Watermelon</option>
-                        <option value="6">Zebra</option>
-                    </select>
-                </div>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
-                    <div class="form-check">
-                        <label for="render"> Render Object </label>
-                        <br />
-                        <input
-                            class="form-check-input"
-                            type="checkbox"
-                            name="render"
-                            id="render"
-                            checked
-                        />
+                    <div>
+                        <small>Intensity (0.0 - 1.0)</small>
+                        <input id="fogIntensity" type="range" min="0.0" max="1.0" step=".01" value="0" />
                     </div>
                 </div>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
-                    <label for="render"> Rotation </label>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <div class="form-check">
+                    <label for="projection"> Projection properties </label>
                     <div class="row">
-                        <small>(About X-Axis)</small>
-                        <br />
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="rotation" id="down">Down</button>
-                        </div>
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="rotation" id="up">Up</button>
-                        </div>
+                        <small>FOV (90 - 180 degrees)</small>
+                        <input id="fov" type="range" min="90" max="180" step="5" value="135" />
                     </div>
                     <div class="row">
-                        <small>(About Y-Axis)</small>
-                        <br />
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="rotation" id="left">Left</button>
-                        </div>
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="rotation" id="right">Right</button>
-                        </div>
+                        <small>Near (0.01 - 2.0)</small>
+                        <input id="near" type="range" min="0.01" max="2.0" step=".01" value=".01" />
                     </div>
                     <div class="row">
-                        <small>(About Z-Axis)</small>
-                        <br />
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="rotation" id="counterclockwise">
-                                Counterclockwise
-                            </button>
-                        </div>
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="rotation" id="clockwise">
-                                Clockwise
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
-                    <label for="translation"> Translation </label>
-                    <div class="row">
-                        <small>(X-Axis)</small>
-                        <br />
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="translation" id="xMinus">-</button>
-                        </div>
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="translation" id="xPlus">+</button>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <small>(Y-Axis)</small>
-                        <br />
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="translation" id="yMinus">-</button>
-                        </div>
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="translation" id="yPlus">+</button>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <small>(About Z-Axis)</small>
-                        <br />
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="translation" id="zMinus">-</button>
-                        </div>
-                        <div
-                            class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6"
-                        >
-                            <button class="translation" id="zPlus">+</button>
-                        </div>
+                        <small>Far (0.01 - 10.0)</small>
+                        <input id="far" type="range" min="0.01" max="10.0" step=".01" value="5.0" />
                     </div>
                 </div>
             </div>
         </div>
+        <div class="row">
+            <h3>Object Modifications</h3>
+            <button type="button" id="restoreObject">
+                Restore Object Defaults
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <br />
+                <label for="object">Choose an object:</label>
+                <br />
+                <select name="object" id="objectSelect">
+                    <option value="kitty">Kitty</option>
+                    <option value="pumpkin">Pumpkin</option>
+                    <option value="puppy">Puppy</option>
+                    <option value="rock">Rock</option>
+                    <option value="pizza">Pizza</option>
+                    <option value="wooden_crate">Wooden Crate</option>
+                </select>
+                <br />
+                <br />
+                <label for="texture">Choose a texture:</label>
+                <br />
+                <select name="texture" id="textureSelect">
+                    <option value="0">Default</option>
+                    <option value="1">Boat</option>
+                    <option value="2">Camo</option>
+                    <option value="3">Stone</option>
+                    <option value="4">Tiger</option>
+                    <option value="5">Watermelon</option>
+                    <option value="6">Zebra</option>
+                </select>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <div class="form-check">
+                    <label for="render"> Render Object </label>
+                    <br />
+                    <input class="form-check-input" type="checkbox" name="render" id="render" checked />
+                </div>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <label for="render"> Rotation </label>
+                <div class="row">
+                    <small>(About X-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="rotation" id="down">Down</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="rotation" id="up">Up</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <small>(About Y-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="rotation" id="left">Left</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="rotation" id="right">Right</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <small>(About Z-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="rotation" id="counterclockwise">
+                            Counterclockwise
+                        </button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="rotation" id="clockwise">
+                            Clockwise
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 col-lg-3">
+                <label for="translation"> Translation </label>
+                <div class="row">
+                    <small>(X-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="translation" id="xMinus">-</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="translation" id="xPlus">+</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <small>(Y-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="translation" id="yMinus">-</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="translation" id="yPlus">+</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <small>(About Z-Axis)</small>
+                    <br />
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="translation" id="zMinus">-</button>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6 col-lg-6">
+                        <button class="translation" id="zPlus">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <!-- obj shaders -->
-        <script id="vertex-shader" type="x-shader/x-vertex">
+    <!-- obj shaders -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
             attribute vec3 nPosition;
@@ -283,6 +209,7 @@
             // camera properties
             uniform mat4 modelViewMatrix;
             uniform mat4 projectionMatrix;
+            uniform mat3 normalMatrix;
 
             // the stationary and camera light will
             // share the same parameters except position
@@ -322,17 +249,19 @@
                 gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
 
                 // get the position of this vertex
-                vec3 pos = (modelViewMatrix * vPosition).xyz;
+                vec3 pos = (vPosition).xyz;
 
                 // slPositionLoc is null without this
-                vec4 slPos = modelViewMatrix * lPosition;
+                vec4 slPos = lPosition;
 
                 //pass positional vectors
-                L = normalize(slPos.xyz - pos);
+                L = normalize(lPosition.xyz - pos);
+
                 //check on later
                 V = -normalize(pos);
 
-                N = normalize(nPosition);
+                // negative to account for positive Z
+                N = -normalize(normalMatrix * nPosition);
 
                 // pass light properties to fragment shader
                 fTexCoord = tPosition;
@@ -344,7 +273,7 @@
             }
         </script>
 
-        <script id="fragment-shader" type="x-shader/x-fragment">
+    <script id="fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
 
             // texture vars
@@ -416,7 +345,7 @@
             }
         </script>
 
-        <script id="pumpkin-vertex-shader" type="x-shader/x-fragment">
+    <script id="pumpkin-vertex-shader" type="x-shader/x-fragment">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
             attribute vec3 nPosition;
@@ -453,7 +382,7 @@
             }
         </script>
 
-        <script id="pumpkin-fragment-shader" type="x-shader/x-fragment">
+    <script id="pumpkin-fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
 
             // texture vars
@@ -494,148 +423,56 @@
             }
         </script>
 
-        <!-- required scripts -->
-        <script type="text/javascript" src="../Common/webgl-utils.js"></script>
-        <script type="text/javascript" src="../Common/initShaders.js"></script>
-        <script type="text/javascript" src="../Common/MV.js"></script>
-        <script type="text/javascript" src="objLoader.js"></script>
-        <script type="text/javascript" src="project.js"></script>
+    <!-- required scripts -->
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="objLoader.js"></script>
+    <script type="text/javascript" src="project.js"></script>
 
-        <!-- Bootstrap -->
-        <!-- Latest compiled and minified CSS -->
-        <link
-            rel="stylesheet"
-            href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-        />
+    <!-- Bootstrap -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
 
-        <!-- jQuery library -->
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-        <!-- Latest compiled JavaScript -->
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-        <!-- texture images -->
-        <img
-            alt="kittyTexture"
-            id="kittyTexture"
-            src="./objs/kitty/color.jpg"
-            hidden
-        />
-        <img
-            alt="kittyNormal"
-            id="kittyNormal"
-            src="./objs/kitty/normal.jpg"
-            hidden
-        />
+    <!-- texture images -->
+    <img alt="kittyTexture" id="kittyTexture" src="./objs/kitty/color.jpg" hidden />
+    <img alt="kittyNormal" id="kittyNormal" src="./objs/kitty/normal.jpg" hidden />
 
-        <img
-            alt="pumpkinTexture"
-            id="pumpkinTexture"
-            src="./objs/pumpkin/pumpkin_color.jpg"
-            hidden
-        />
-        <img
-            alt="pumpkinBump"
-            id="pumpkinBump"
-            src="./objs/pumpkin/pumpkin_bump.jpg"
-            hidden
-        />
-        <img
-            alt="stalkTexture"
-            id="stalkTexture"
-            src="./objs/pumpkin/stalk_color.jpg"
-            hidden
-        />
-        <img
-            alt="stalkBump"
-            id="stalkBump"
-            src="./objs/pumpkin/stalk_bump.jpg"
-            hidden
-        />
+    <img alt="pumpkinTexture" id="pumpkinTexture" src="./objs/pumpkin/pumpkin_color.jpg" hidden />
+    <img alt="pumpkinBump" id="pumpkinBump" src="./objs/pumpkin/pumpkin_bump.jpg" hidden />
+    <img alt="stalkTexture" id="stalkTexture" src="./objs/pumpkin/stalk_color.jpg" hidden />
+    <img alt="stalkBump" id="stalkBump" src="./objs/pumpkin/stalk_bump.jpg" hidden />
 
-        <img
-            alt="puppyTexture"
-            id="puppyTexture"
-            src="./objs/puppy/color.jpg"
-            hidden
-        />
-        <img
-            alt="puppyNormal"
-            id="puppyNormal"
-            src="./objs/puppy/normal.jpg"
-            hidden
-        />
+    <img alt="puppyTexture" id="puppyTexture" src="./objs/puppy/color.jpg" hidden />
+    <img alt="puppyNormal" id="puppyNormal" src="./objs/puppy/normal.jpg" hidden />
 
-        <img
-            alt="rockTexture"
-            id="rockTexture"
-            src="./objs/rock/color.jpg"
-            hidden
-        />
-        <img
-            alt="rockNormal"
-            id="rockNormal"
-            src="./objs/rock/normal.jpg"
-            hidden
-        />
-        <img
-            alt="rockGlossiness"
-            id="rockGlossiness"
-            src="./objs/rock/glossiness.jpg"
-            hidden
-        />
-        <img
-            alt="rockOcclusion"
-            id="rockOcclusion"
-            src="./objs/rock/occlusion.jpg"
-            hidden
-        />
-        <img
-            alt="rockSpecular"
-            id="rockSpecular"
-            src="./objs/rock/specular.jpg"
-            hidden
-        />
+    <img alt="rockTexture" id="rockTexture" src="./objs/rock/color.jpg" hidden />
+    <img alt="rockNormal" id="rockNormal" src="./objs/rock/normal.jpg" hidden />
+    <img alt="rockGlossiness" id="rockGlossiness" src="./objs/rock/glossiness.jpg" hidden />
+    <img alt="rockOcclusion" id="rockOcclusion" src="./objs/rock/occlusion.jpg" hidden />
+    <img alt="rockSpecular" id="rockSpecular" src="./objs/rock/specular.jpg" hidden />
 
-        <img
-            alt="pizzaTexture"
-            id="pizzaTexture"
-            src="./objs/pizza/PIZZA_TEXTURES/1k/pizza_5k_BaseColor_1k.jpg"
-            hidden
-        />
+    <img alt="pizzaTexture" id="pizzaTexture" src="./objs/pizza/PIZZA_TEXTURES/1k/pizza_5k_BaseColor_1k.jpg" hidden />
 
-        <img
-            alt="pizzaNormal"
-            id="pizzaNormal"
-            src="./objs/pizza/PIZZA_TEXTURES/1k/pizza_5k_Normal_1k.jpg"
-            hidden
-        />
+    <img alt="pizzaNormal" id="pizzaNormal" src="./objs/pizza/PIZZA_TEXTURES/1k/pizza_5k_Normal_1k.jpg" hidden />
 
-        <img
-            alt="woodenCrateTexture"
-            id="woodenCrateTexture"
-            src="./objs/box/crate_BaseColor.png"
-            hidden
-        />
+    <img alt="woodenCrateTexture" id="woodenCrateTexture" src="./objs/box/crate_BaseColor.png" hidden />
 
-        <img
-            alt="woodenCrateNormal"
-            id="woodenCrateNormal"
-            src="./objs/box/crate_Normal.png"
-            hidden
-        />
+    <img alt="woodenCrateNormal" id="woodenCrateNormal" src="./objs/box/crate_Normal.png" hidden />
 
-        <!-- Additional Textures -->
-        <img alt="boat" id="boatTexture" src="./textures/boat.jpg" hidden />
-        <img alt="camo" id="camoTexture" src="./textures/camo.jpg" hidden />
-        <img alt="stone" id="stoneTexture" src="./textures/stone.jpg" hidden />
-        <img alt="tiger" id="tigerTexture" src="./textures/tiger.png" hidden />
-        <img
-            alt="watermelon"
-            id="watermelonTexture"
-            src="./textures/watermelon.jpg"
-            hidden
-        />
-        <img alt="zebra" id="zebraTexture" src="./textures/zebra.png" hidden />
-    </body>
+    <!-- Additional Textures -->
+    <img alt="boat" id="boatTexture" src="./textures/boat.jpg" hidden />
+    <img alt="camo" id="camoTexture" src="./textures/camo.jpg" hidden />
+    <img alt="stone" id="stoneTexture" src="./textures/stone.jpg" hidden />
+    <img alt="tiger" id="tigerTexture" src="./textures/tiger.png" hidden />
+    <img alt="watermelon" id="watermelonTexture" src="./textures/watermelon.jpg" hidden />
+    <img alt="zebra" id="zebraTexture" src="./textures/zebra.png" hidden />
+</body>
+
 </html>
