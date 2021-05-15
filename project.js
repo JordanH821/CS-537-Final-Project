@@ -8,6 +8,7 @@ let aspectDefault = 1;
 let nearDefault = 0.01;
 let farDefault = 5.0;
 let fogIntensityDefault = 0.25;
+let ambientIntensityDefault = 0.1;
 let currentObject = 0;
 let objects = {};
 let defaults = {};
@@ -21,25 +22,6 @@ var minorAxis = 7;
 // ellipse range HTML elements
 var majorAxisRangeElement;
 var minorAxisRangeElement;
-
-// light constants
-var diffuseConstant = 0.9;
-var specularConstant = 0.9;
-var ambientConstant = 0.1;
-var stationaryLightPosition = vec4(0.0, 100, -100, 1.0);
-
-// material constants
-var shininessCoefficient = 100;
-
-// light properties
-var light = {
-    // OFFICE HOURS: Do we need this?
-    color: vec3(1.0, 1.0, 1.0),
-    // OFFICE HOURS: Should this be zero vector, since it is a point light?
-    ambient: vec4(ambientConstant, ambientConstant, ambientConstant, 1.0),
-    diffuse: vec4(diffuseConstant, diffuseConstant, diffuseConstant, 1.0),
-    specular: vec4(specularConstant, specularConstant, specularConstant, 1.0),
-};
 
 function isPowerOf2(value) {
     return (value & (value - 1)) == 0;
@@ -57,6 +39,33 @@ let sceneProperties = {
     modelViewMatrix: lookAt(vec3(0.0, 0.0, -1), vec3(0, 0, 1), vec3(0, 1, 0)),
     fogColor: vec4(0.8, 0.9, 1, 1),
     fogIntensity: fogIntensityDefault,
+    ambientIntensity: ambientIntensityDefault,
+};
+
+// light constants
+var diffuseConstant = 0.9;
+var specularConstant = 0.9;
+var stationaryLightPosition = vec4(0.0, 100, -100, 1.0);
+
+// material constants
+var shininessCoefficient = 100;
+
+// light properties
+var light = {
+    // OFFICE HOURS: Do we need this?
+    color: vec3(1.0, 1.0, 1.0),
+    // OFFICE HOURS: Should this be zero vector, since it is a point light?
+    // ambient: vec4(sceneProperties.ambientIntensity, sceneProperties.ambientIntensity, sceneProperties.ambientIntensity, 1.0),
+    get ambient() {
+        return vec4(
+            sceneProperties.ambientIntensity,
+            sceneProperties.ambientIntensity,
+            sceneProperties.ambientIntensity,
+            1.0
+        );
+    },
+    diffuse: vec4(diffuseConstant, diffuseConstant, diffuseConstant, 1.0),
+    specular: vec4(specularConstant, specularConstant, specularConstant, 1.0),
 };
 
 function setSceneSliderValues() {
@@ -64,6 +73,7 @@ function setSceneSliderValues() {
     $('#near').val(sceneProperties.near);
     $('#far').val(sceneProperties.far);
     $('#fogIntensity').val(sceneProperties.fogIntensity);
+    $('#ambientIntensity').val(sceneProperties.ambientIntensity);
 }
 
 function getCombinedRotation(x, y, z) {
@@ -676,9 +686,12 @@ function setupOnClickListeners() {
         $('#render').prop('checked', true);
     });
 
-    $('#fov, #near, #far, #fogIntensity').on('change', (e) => {
-        sceneProperties[e.target.id] = Number.parseFloat(e.target.value);
-    });
+    $('#fov, #near, #far, #fogIntensity, #ambientIntensity').on(
+        'change',
+        (e) => {
+            sceneProperties[e.target.id] = Number.parseFloat(e.target.value);
+        }
+    );
 
     $('#restoreSceneProperties').on('click', () => {
         sceneProperties.fov = fovDefault;
@@ -686,6 +699,7 @@ function setupOnClickListeners() {
         sceneProperties.near = nearDefault;
         sceneProperties.far = farDefault;
         sceneProperties.fogIntensity = fogIntensityDefault;
+        sceneProperties.ambientIntensity = ambientIntensityDefault;
         setSceneSliderValues();
     });
 
