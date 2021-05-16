@@ -472,6 +472,20 @@ function setupObjectShaderBuffers(obj) {
     );
 }
 
+function getTimeAngle() {
+    let time = document.getElementById('sunTime').value;
+    console.log(time);
+    if (time.length === 0) {
+        time = new Date().getHours();
+    }
+    else{
+        time = time.substr(0,2);
+        time = parseInt(time);
+    }
+    
+    return time * 15;
+}
+
 function renderObject(obj) {
     gl.useProgram(obj['shader']);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj['indexBuffer']);
@@ -599,6 +613,10 @@ function render() {
     for (const obj of Object.values(objects)) {
         if (obj['isRendering']) renderObject(obj);
     }
+    let time = getTimeAngle();
+    
+    stationaryLightPosition = vec4(circlePoints[time % circlePoints.length],circlePoints[time % circlePoints.length], -100.0, 1);
+
     requestAnimationFrame(render);
 }
 
