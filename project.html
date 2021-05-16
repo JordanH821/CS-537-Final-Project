@@ -340,8 +340,9 @@
                 }
 
                 vec4 Istationary = Ias + Ids + Iss;
+                vec4 light = Istationary * textureRGB;
 
-                gl_FragColor = Istationary * mix(textureRGB, fFogColor, fFogIntensity);
+                gl_FragColor = mix(light, fFogColor, fFogIntensity);
             }
         </script>
 

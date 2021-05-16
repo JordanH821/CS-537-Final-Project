@@ -148,8 +148,8 @@ objects['puppy'] = puppy;
 let pumpkin = {
     objPath: './objs/pumpkin/pumpkin.obj',
     textureHtmlId: 'pumpkinTexture',
-    vertexShader: 'pumpkin-vertex-shader',
-    fragmentShader: 'pumpkin-fragment-shader',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(0.003, 0.003, 0.003),
     translationVector: vec3(0.0, 0.25, 0),
     rotateX: vec4(0, 1, 0, 0),
@@ -157,7 +157,7 @@ let pumpkin = {
     rotateZ: vec4(0, 0, 0, 1),
     isRendering: true,
 };
-// objects['pumpkin'] = pumpkin;
+objects['pumpkin'] = pumpkin;
 
 let rock = {
     objPath: './objs/rock/rock.obj',
