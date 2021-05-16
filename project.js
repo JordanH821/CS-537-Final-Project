@@ -19,7 +19,9 @@ var cameraPositionIndex = 0;
 var majorAxis = 10;
 var minorAxis = 7;
 
-// ellipse range HTML elements
+var radius = 20;
+
+// circle range HTML elements
 var majorAxisRangeElement;
 var minorAxisRangeElement;
 
@@ -474,16 +476,19 @@ function setupObjectShaderBuffers(obj) {
 
 function getTimeAngle() {
     let time = document.getElementById('sunTime').value;
-    console.log(time);
+    let hours = "";
+    let minutes = "";
+
     if (time.length === 0) {
-        time = new Date().getHours();
+        hours = new Date().getHours();
+        minutes = new Date().getMinutes();
     }
     else{
-        time = time.substr(0,2);
-        time = parseInt(time);
+        hours = parseInt(time.substr(0,2));
+        minutes = parseInt(time.substr(3,5));
     }
-    
-    return time * 15;
+    let index = (((hours*60 + minutes) / 1440) * 360);
+    return parseInt(index);
 }
 
 function renderObject(obj) {
@@ -584,12 +589,12 @@ function ellipse() {
     cameraPositionIndex = 0;
     circlePoints = [];
 
-    let u = vec3(0, 0, 1);
+    let u = vec3(1, 0, 0);
     let v = vec3(1 / Math.sqrt(2), 1 / Math.sqrt(2), 0);
-    for (let deg = 0; deg < 360; deg += 2) {
+    for (let deg = 0; deg < 360; deg += 1) {
         let point = add(
-            scale(majorAxis * Math.cos(radians(deg)), u),
-            scale(minorAxis * Math.sin(radians(deg)), v)
+            scale(radius * Math.cos(radians(deg)), u),
+            scale(radius * Math.sin(radians(deg)), v)
         );
         circlePoints.push(point);
     }
@@ -615,7 +620,7 @@ function render() {
     }
     let time = getTimeAngle();
     
-    stationaryLightPosition = vec4(circlePoints[time % circlePoints.length],circlePoints[time % circlePoints.length], -100.0, 1);
+    stationaryLightPosition = vec4(0.0,circlePoints[time % circlePoints.length], 200, 1);
 
     requestAnimationFrame(render);
 }
