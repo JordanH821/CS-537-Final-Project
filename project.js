@@ -1,5 +1,6 @@
 'use strict';
 // Fog implementation based on the tutorial at: https://webglfundamentals.org/webgl/lessons/webgl-fog.html
+//Normal, tangent and bitangent mapping is based on the tutorial at https://www.youtube.com/watch?v=vemIyDpBBH8&ab_channel=SketchpunkLabs
 var canvas;
 var gl;
 var aspect = 1;
@@ -245,6 +246,58 @@ function getOrderedTextureCoordsFromObj(o) {
     return texCoordsOrderedWithVertices;
 }
 
+//TODO do we wanna add these to MV.js?----
+function vec3Set(v, x, y, z){
+    v[0] = x; v[1] = y; v[2] = z;
+
+    return v;
+}
+
+function vec2Set(v, x, y){
+    v[0] = x; v[1] = y;
+
+    return v;
+}
+
+function scalev( s, u )
+{
+    if ( !Array.isArray(u) ) {
+        throw "scale: second parameter " + u + " is not a vector";
+    }
+
+    var result = [];
+    for ( var i = 0; i < u.length; ++i ) {
+        result.push( s * u[i] );
+    }
+
+    return result;
+}
+
+function normVec(ary, i ){
+    var ii = i+1; 
+    var iii = i+2;
+    var mag = ary[i]*ary[i] + ary[ii]*ary[ii] + ary[iii]*ary[iii];
+
+    mag = 1 / Math.sqrt(mag);
+    ary[i] *= mag;
+    ary[ii] *= mag;
+    ary[iii] *= mag;
+
+    return ary;
+}
+function normalizev(v){
+    var mag = Math.sqrt( v[0]*v[0] + v[1]*v[1] + v[2]*v[2] );
+    if(mag == 0) return v;
+
+    var out = v;
+    out[0] = v[0] / mag;
+    out[1] = v[1] / mag;
+    out[2] = v[2] / mag;
+
+    return out;
+}
+//----------------------------------------------
+
 function loadedObj(data) {
     const objectList = Object.values(objects);
     let obj = loadOBJFromBuffer(data);
@@ -300,51 +353,75 @@ function normalMapping(obj){
             i = obj['indices'][x + y] * 3; //Index to flat vertex array
             ii = obj['indices'][x + y] * 2; //Index to flat uv array
 
-            tri[y].set(vertPtr[i], vertPtr[i+1], vertPtr[i+2]);
-            uv[y].set(uvPtr[ii], uvPtr[ii+1]);
+           tri[y] = vec3Set(tri[y], vertPtr[i], vertPtr[i+1], vertPtr[i+2]);
+           uv[y] = vec2Set(uv[y], uvPtr[ii], uvPtr[ii+1]);
         }
-    }
 
-    //Prepare differences between two edges of the triangle
-    //egde1 = diffUV1.x * T + diffUV1.y * B
-    //edge2 = diffUV2.x * T + diffUV2.y * B
+        //Prepare differences between two edges of the triangle
+        //egde1 = diffUV1.x * T + diffUV1.y * B
+        //edge2 = diffUV2.x * T + diffUV2.y * B
+       
+        //tri[1].sub(tri[0], edge1); //Length vetcor of two edges of the triangle
+        edge1 = subtract(tri[1], tri[0]);
+       // console.log("edge1: " + edge1)
+       
+        // tri[2].sub(tri[0], edge2);
+        edge2 = subtract(tri[2], tri[0]);
+       // console.log("edge2: " + edge2)
 
-    tri[1].sub(tri[0], edge1); //Length vetcor of two edges of the triangle
-    tri[2].sub(tri[0], edge2);
 
-    uv[1].sub(uv[0], edgeUV1); //Length of the UV coord
-    uv[2].sub(uv[0], edgeUV2);
+        //uv[1].sub(uv[0], edgeUV1); //Length of the UV coord
+        edgeUV1 = subtract(uv[1], uv[0]);
 
-    r = 1.0 / (edgeUV1.x * edgeUV2.y - edgeUV1.y * edgeUV2.x); // denom for Tangent and Bitangent
+        //uv[2].sub(uv[0], edgeUV2);
+       // console.log("uv[1]:" + uv[0])
+        edgeUV2 = subtract(uv[2], uv[0]);
+        //console.log("edge:" + edgeUV2[1])
 
-    //tangent = (edge1 + diffUV2.y - edge2 * diffUV1.y) * r
-    edge1.scale(edgeUV2.y, tempA);
-    edge2.scale(edgeUV1.y, tempB);
-    tempA.sub(tempB, T).scale(r);
+        r = 1.0 / (edgeUV1[0] * edgeUV2[1] - edgeUV1[1] * edgeUV2[0]); // denom for Tangent and Bitangent
 
-    //bitangent = (edge2 * diffUV1.x - edge1 * diffUV2.x) * r
-    edge2.scale(edgeUV1.x, tempA);
-    edge1.scale(edgeUV2.x, tempB);
-    tempA.sub(tempB, B).scale(r);
+        //tangent = (edge1 + diffUV2.y - edge2 * diffUV1.y) * r
+        //edge1.scale(edgeUV2.y, tempA);
+        tempA = scalev(edgeUV2[1], edge1);
 
-    //normal = cross(edge1, edge2)
-    vec3.cross(edge1, edge2, N)
-    //vec3.cross(B, N, T);
-    //vec3.cross(T, N, B);
+        //edge2.scale(edgeUV1.y, tempB);
+        tempB = scalev(edgeUV1[1], edge2);
 
-    //Save data to flat array
-    //Verts are shared between triangles, so add up all the data and any verts that are shared, average the data later
+        //tempA.sub(tempB, T).scale(r);
+        T = subtract(tempA, tempB);
+        T = scalev(r, T);
 
-    for(y = 0; y < 3; y++){
-        ii = obj['indices'][x + y] //Vertex index
-        i = ii * 3 //vertex flat array index
+        //bitangent = (edge2 * diffUV1.x - edge1 * diffUV2.x) * r
+        //edge2.scale(edgeUV1.x, tempA);
+        tempA = scalev(edgeUV1[1], edge2);
+        
+        //edge1.scale(edgeUV2.x, tempB);
+        tempB = scalev(edgeUV2[1], edge1);
 
-        avgCount[ii]++; //add up how many times this vertex data has been added
+        //tempA.sub(tempB, B).scale(r);
+        B = subtract(tempA, tempB);
+        B = scalev(r, B);
 
-        tAry[i] += T.x;     tAry[i+1] += T.y;       tAry[i+2] += T.z; //Tangent   
-        bAry[i] += B.x;     bAry[i+1] += B.y;       bAry[i+2] += B.z; //bitangent  
-        nAry[i] += N.x;     tAry[i+1] += N.y;       tAry[i+2] += N.z; //Normal          
+        //normal = cross(edge1, edge2)
+       // vec3.cross(edge1, edge2, N)
+        N = cross(edge1, edge2);
+        //vec3.cross(B, N, T);
+        //vec3.cross(T, N, B);
 
+        //Save data to flat array
+        //Verts are shared between triangles, so add up all the data and any verts that are shared, average the data later
+
+        for(y = 0; y < 3; y++){
+            ii = obj['indices'][x + y] //Vertex index
+            i = ii * 3 //vertex flat array index
+
+            avgCount[ii]++; //add up how many times this vertex data has been added
+
+            tAry[i] += T[0];     tAry[i+1] += T[1];       tAry[i+2] += T[2]; //Tangent   
+            bAry[i] += B[0];     bAry[i+1] += B[1];       bAry[i+2] += B[2]; //bitangent  
+            nAry[i] += N[0];     tAry[i+1] += N[1];       tAry[i+2] += N[2]; //Normal          
+
+        }
     }
 
     //Smooth out the vectors by averaging the verticies that have more than one set of data
@@ -364,9 +441,12 @@ function normalMapping(obj){
 
 
     //Normalize the data so the shader doesn't need to.
-    tAry = normalize(tAry);
-    bAry = normalize(bAry);
-    nAry = normalize(nAry);
+    for( i = 0; i < vertCount; i++){
+        ii = i * 3;
+        tAry = normVec(tAry);
+        bAry = normVec(bAry);
+        if(nAry) nAry = normVec(nAry);
+    }
 
     //Orthogonalize the tangent, this allows us to use transponse on the mat3 in the shader instead of inverse.
     //Also check if handedness, incase uvs are pointing the wrong way, thsi fixes tangent.
@@ -381,15 +461,23 @@ function normalMapping(obj){
 
     for( i = 0; i < vertCount; i++){
         ii = i * 3;
-        tt.set(tAry[0+ii], tAry[1+ii], tAry[2+ii]);
-        bb.set(bAry[0+ii], bAry[1+ii], bAry[2+ii]);
-        nn.set(nAry[0+ii], nAry[1+ii], nAry[2+ii]);
+        vec3Set(tt, tAry[0+ii], tAry[1+ii], tAry[2+ii]);
+        vec3Set(bb, bAry[0+ii], bAry[1+ii], bAry[2+ii]);
+        vec3Set(nn, nAry[0+ii], nAry[1+ii], nAry[2+ii]);
 
-        d = vec3.dot(nn, tt);
-        tt.sub(nn.scale(d,v)).normalize();
+        d = dot(nn, tt);
 
-        d = vec3.dot(vec3.cross(nn, tt, vv), bb);
-        if( d < 0) tt.scale(-1);
+        //tt.sub(nn.scale(d,v)).normalize();
+        vv = scalev(d, nn);
+        tt = subtract(vv, tt);
+        tt = normalizev(tt);
+
+        //d = vec3.dot(vec3.cross(nn, tt, vv), bb);
+        vv = cross(nn, tt);
+        d = dot(vv, bb);
+
+
+        if( d < 0) tt = scalev(-1, tt)//tt.scale(-1);
 
         tAry[0+ii] = tt[0];
         tAry[1+ii] = tt[1];
