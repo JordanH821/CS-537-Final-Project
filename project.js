@@ -252,6 +252,7 @@ function loadedObj(data) {
     let jsObj = objectList[currentObject];
     jsObj['indices'] = obj.i_verts;
     jsObj['vertices'] = obj.c_verts;
+    jsObj['uv'] = obj.c_uvt;
     jsObj['numVerts'] = jsObj['indices'].length;
     jsObj['normals'] = getOrderedNormalsFromObj(obj);
     jsObj['texCoords'] = getOrderedTextureCoordsFromObj(obj);
@@ -261,6 +262,144 @@ function loadedObj(data) {
     } else {
         setupAfterDataLoad();
     }
+}
+
+function normalMapping(obj){
+    var vertPtr = obj['vertices'];
+    var uvPtr = obj['uv'];
+
+
+    var tri = [new vec3(), new vec3(), new vec3()]; //Process Triangle Verts
+    var uv = [new vec2(), new vec2(), new vec2()]; //Process Triangle UV0s
+
+    var edge1 = new vec3(); //Length of an edge of the traingle
+    var edge2 = new vec3();
+    var edgeUV1 = new vec2(); //Edge Uv difference
+    var edgeUV2 = new vec2();
+
+    var T = new vec3(); //Final Vector of Tangent;
+    var B = new vec3(); //Bitangent;
+    var N = new vec3(); //Normal
+
+    var tempA = new vec3(); //Temporary Vectors
+    var tempB = new vec3(); 
+
+    var vertLen = obj['vertices'].length; //How many verticies
+    var vertCount = vertLen/3; //How many floats to make up all verts
+
+    var avgCount = new Array(vertCount).fill(0); // How many times the vector data has been adde dup, used to avg later
+    var tAry = new Array(vertLen).fill(0); //Final Flat Tangent Data - left/right
+    var bAry = new Array(nAry).fill(0); //Final flat bitangent data - up
+    var nAry = new Array(vertLen).fill(0) //Final flat normal data - forward
+
+    var x, y , r, i, ii; // resuable vars
+
+    for(x = 0; x < obj['indices'].length; x += 3){
+        //Get the 3 points of a triangle
+        for(y = 0; y < 3; y++){
+            i = obj['indices'][x + y] * 3; //Index to flat vertex array
+            ii = obj['indices'][x + y] * 2; //Index to flat uv array
+
+            tri[y].set(vertPtr[i], vertPtr[i+1], vertPtr[i+2]);
+            uv[y].set(uvPtr[ii], uvPtr[ii+1]);
+        }
+    }
+
+    //Prepare differences between two edges of the triangle
+    //egde1 = diffUV1.x * T + diffUV1.y * B
+    //edge2 = diffUV2.x * T + diffUV2.y * B
+
+    tri[1].sub(tri[0], edge1); //Length vetcor of two edges of the triangle
+    tri[2].sub(tri[0], edge2);
+
+    uv[1].sub(uv[0], edgeUV1); //Length of the UV coord
+    uv[2].sub(uv[0], edgeUV2);
+
+    r = 1.0 / (edgeUV1.x * edgeUV2.y - edgeUV1.y * edgeUV2.x); // denom for Tangent and Bitangent
+
+    //tangent = (edge1 + diffUV2.y - edge2 * diffUV1.y) * r
+    edge1.scale(edgeUV2.y, tempA);
+    edge2.scale(edgeUV1.y, tempB);
+    tempA.sub(tempB, T).scale(r);
+
+    //bitangent = (edge2 * diffUV1.x - edge1 * diffUV2.x) * r
+    edge2.scale(edgeUV1.x, tempA);
+    edge1.scale(edgeUV2.x, tempB);
+    tempA.sub(tempB, B).scale(r);
+
+    //normal = cross(edge1, edge2)
+    vec3.cross(edge1, edge2, N)
+    //vec3.cross(B, N, T);
+    //vec3.cross(T, N, B);
+
+    //Save data to flat array
+    //Verts are shared between triangles, so add up all the data and any verts that are shared, average the data later
+
+    for(y = 0; y < 3; y++){
+        ii = obj['indices'][x + y] //Vertex index
+        i = ii * 3 //vertex flat array index
+
+        avgCount[ii]++; //add up how many times this vertex data has been added
+
+        tAry[i] += T.x;     tAry[i+1] += T.y;       tAry[i+2] += T.z; //Tangent   
+        bAry[i] += B.x;     bAry[i+1] += B.y;       bAry[i+2] += B.z; //bitangent  
+        nAry[i] += N.x;     tAry[i+1] += N.y;       tAry[i+2] += N.z; //Normal          
+
+    }
+
+    //Smooth out the vectors by averaging the verticies that have more than one set of data
+    var scale;
+    for(i = 0; i < vertCount; i++){
+        ii = i * 3;
+
+        if(avgCount[i] > 1){
+            scale = 1 / avgCount[i];
+            for(x = 0; x < 3; x++){
+                tAry[ii+x] *= scale;
+                bAry[ii+x] *= scale;
+                if(nAry) nAry[ii+x] *= scale
+            }
+        }
+    }
+
+
+    //Normalize the data so the shader doesn't need to.
+    tAry = normalize(tAry);
+    bAry = normalize(bAry);
+    nAry = normalize(nAry);
+
+    //Orthogonalize the tangent, this allows us to use transponse on the mat3 in the shader instead of inverse.
+    //Also check if handedness, incase uvs are pointing the wrong way, thsi fixes tangent.
+
+    var tt = new vec3(); //Tangent
+    var bb = new vec3(); //Bitangent;
+    var nn = new vec3(); //Normal
+    var vv = new vec3(); //tmp vec
+    var d;
+
+    //Gram-Schmidt Process
+
+    for( i = 0; i < vertCount; i++){
+        ii = i * 3;
+        tt.set(tAry[0+ii], tAry[1+ii], tAry[2+ii]);
+        bb.set(bAry[0+ii], bAry[1+ii], bAry[2+ii]);
+        nn.set(nAry[0+ii], nAry[1+ii], nAry[2+ii]);
+
+        d = vec3.dot(nn, tt);
+        tt.sub(nn.scale(d,v)).normalize();
+
+        d = vec3.dot(vec3.cross(nn, tt, vv), bb);
+        if( d < 0) tt.scale(-1);
+
+        tAry[0+ii] = tt[0];
+        tAry[1+ii] = tt[1];
+        tAry[2+ii] = tt[2];
+    }
+
+    //Save data
+    obj['tangent'] = tAry;
+    obj['bitangent'] = bAry;
+    obj['normals'] = nAry;
 }
 
 function configureTextures(obj) {
@@ -413,6 +552,8 @@ function setupObjectShaderBuffers(obj) {
         new Float32Array(obj['normals']),
         gl.STATIC_DRAW
     );
+
+
 
     // model view matrix location
     obj['modelViewMatrixLoc'] = gl.getUniformLocation(
@@ -588,6 +729,7 @@ function setupAfterDataLoad() {
     for (const obj of Object.values(objects)) {
         setupObjectShaderBuffers(obj);
         configureTextures(obj);
+        normalMapping(obj);
     }
     configureAdditionalTextures();
     render();
