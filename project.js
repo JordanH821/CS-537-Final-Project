@@ -618,7 +618,9 @@ function setupOnClickListeners() {
     }
 
     $('#objectSelect').on('change', () => {
-        $('#render').prop('checked', getSelectedObject().isRendering);
+        const object = getSelectedObject();
+        $('#render').prop('checked', object.isRendering);
+        $('#textureSelect').val(object['currentTexture']);
     });
 
     $('#render').on('click', () => {
