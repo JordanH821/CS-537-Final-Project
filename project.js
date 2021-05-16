@@ -93,6 +93,7 @@ const rotationGetter = {
 };
 
 const normalMatrixGetter = {
+    // https://webglfundamentals.org/webgl/lessons/webgl-3d-lighting-directional.html
     get: function () {
         let worldView = mult(
             mult(sceneProperties.modelViewMatrix, this.rotation),
