@@ -45,7 +45,7 @@ let sceneProperties = {
 
 // light constants
 var diffuseConstant = 0.9;
-var specularConstant = 0.9;
+var specularConstant = 0.8;
 var stationaryLightPosition = vec4(0.0, 100, -100, 1.0);
 
 // material constants
@@ -307,7 +307,7 @@ function loadedObj(data) {
     jsObj['vertices'] = obj.c_verts;
     jsObj['uv'] = obj.c_uvt;
     jsObj['numVerts'] = jsObj['indices'].length;
-    jsObj['normals'] = getOrderedNormalsFromObj(obj);
+    //jsObj['normals'] = getOrderedNormalsFromObj(obj);
     jsObj['texCoords'] = getOrderedTextureCoordsFromObj(obj);
     currentObject++;
     if (currentObject < objectList.length) {
@@ -641,6 +641,23 @@ function setupObjectShaderBuffers(obj) {
         gl.STATIC_DRAW
     );
 
+    //tangent buffer
+    obj['tanBuffer'] = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['tanBuffer']);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(obj['tangent']),
+        gl.STATIC_DRAW
+    );
+
+    //bitangent buffer
+    obj['btanBuffer'] = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['btanBuffer']);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(obj['bitangent']),
+        gl.STATIC_DRAW
+    );
 
 
     // model view matrix location
@@ -672,6 +689,12 @@ function setupObjectShaderBuffers(obj) {
 
     // normal texture
     obj['nPosition'] = gl.getAttribLocation(obj['shader'], 'nPosition');
+
+    //tangents
+    obj['tanPosition'] = gl.getAttribLocation(obj['shader'], 'tanPosition');
+
+    //bitangents
+    obj['btanPosition'] = gl.getAttribLocation(obj['shader'], 'btanPosition');
 
     // normal matrix
     obj['normalMatrixLoc'] = gl.getUniformLocation(
@@ -719,6 +742,21 @@ function renderObject(obj) {
     gl.bindBuffer(gl.ARRAY_BUFFER, obj['normalBuffer']);
     gl.vertexAttribPointer(obj['nPosition'], 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(obj['nPosition']);
+
+    // pass tangent coords
+   // console.log("tanPosition:" + obj['tanPosition']);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['tanBuffer']);
+    gl.vertexAttribPointer(obj['tanPosition'], 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(obj['tanPosition']);
+
+
+    //console.log("btanPosition:" + obj['btanPosition']);
+    // pass bitangent coords
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj['btanBuffer']);
+    gl.vertexAttribPointer(obj['btanPosition'], 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(obj['btanPosition']);
+
 
     // pass camera matrices
     gl.uniformMatrix4fv(

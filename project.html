@@ -201,7 +201,11 @@
     <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
+
+            //TBN
             attribute vec3 nPosition;
+            attribute vec3 tanPosition;
+            attribute vec3 btanPosition;
 
             // light properties
             uniform vec4 lPosition;
@@ -239,12 +243,39 @@
             varying vec4 flAmbient, flSpecular, flDiffuse;
             varying float fShininessCoefficient;
 
+            varying vec3 v_tbn_lightPos;
+            varying vec3 v_tbn_position;
+            varying vec3 v_tbn_cameraPos;
+
+
+            //From https://github.com/glslify/glsl-transpose/blob/master/index.glsl for webGL column major order
+            mat3 transpose(mat3 m) {
+                return mat3(m[0][0], m[1][0], m[2][0],
+                    m[0][1], m[1][1], m[2][1],
+                    m[0][2], m[1][2], m[2][2]);
+            }
+
+            mat3 TBNMatrix(mat4 model, vec3 t, vec3 b, vec3 n){
+                mat3 m3Model = mat3(model); //remove translation, keep rotation and scale
+                vec3 tm = normalize(m3Model * t); //rotate the tangent, bitangent and normal
+                vec3 bm = normalize(m3Model * b);
+                vec3 nm = normalize(m3Model * n);
+
+                return transpose(mat3(tm, bm, nm)); //transpose becasue it is orthongonal
+            }
+
             void main()
             {
                 // pass texture texture coord
                 fTexCoord = tPosition;
                 fFogColor = fogColor;
                 fFogIntensity = fogIntensity;
+
+                mat3 TBN = TBNMatrix(modelViewMatrix, tanPosition, btanPosition, nPosition);
+
+                v_tbn_cameraPos = TBN * vec3(0.0, 0.0, -1);
+                v_tbn_lightPos = TBN * lPosition.xyz;
+                v_tbn_position = TBN * vPosition.xyz;
 
                 gl_Position = projectionMatrix * modelViewMatrix * translation * rotation * scale * vPosition;
 
@@ -255,13 +286,16 @@
                 vec4 slPos = lPosition;
 
                 //pass positional vectors
-                L = normalize(lPosition.xyz - pos);
+                //L = normalize(lPosition.xyz - pos);
+
+                L = normalize(v_tbn_lightPos - v_tbn_position);
+
 
                 //check on later
-                V = -normalize(pos);
+                V = -normalize(v_tbn_position);
 
                 // negative to account for positive Z
-                N = -normalize(normalMatrix * nPosition);
+                //N = -normalize(normalMatrix * nPosition);
 
                 // pass light properties to fragment shader
                 fTexCoord = tPosition;
@@ -299,8 +333,8 @@
 
             void main()
             {
-                /*vec3 N = texture2D(normalMap, fTexCoord).rgb;
-                N = normalize(N * 2.0 - 1.0);*/
+                vec3 N = texture2D(normalMap, fTexCoord).rgb;
+                N = normalize(N * 2.0 - 1.0);
 
                 vec4 textureRGB;
 
@@ -322,7 +356,7 @@
                     textureRGB = texture2D( defaultTex, fTexCoord );
                 }
 
-                // STATIONARY LIGHT CALCULATIONs
+                // STATIONARY LIGHT CALCULATIONS
                 // ambient light component
                 // .49 * .1 * 2 (both light ambient intensities) = .098 < .1
                 const float Ka = .49;
@@ -348,7 +382,11 @@
     <script id="pumpkin-vertex-shader" type="x-shader/x-fragment">
             attribute vec4 vPosition;
             attribute vec2 tPosition;
-            attribute vec3 nPosition;
+
+            //TBN
+            uniform vec3 nPosition;
+            uniform vec3 tanPosition;
+            uniform vec3 btanPosition;
 
             // camera properties
             uniform mat4 modelViewMatrix;
