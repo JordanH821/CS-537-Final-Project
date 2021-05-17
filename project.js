@@ -476,18 +476,17 @@ function setupObjectShaderBuffers(obj) {
 
 function getTimeAngle() {
     let time = document.getElementById('sunTime').value;
-    let hours = "";
-    let minutes = "";
+    let hours = '';
+    let minutes = '';
 
     if (time.length === 0) {
         hours = new Date().getHours();
         minutes = new Date().getMinutes();
+    } else {
+        hours = parseInt(time.substr(0, 2));
+        minutes = parseInt(time.substr(3, 5));
     }
-    else{
-        hours = parseInt(time.substr(0,2));
-        minutes = parseInt(time.substr(3,5));
-    }
-    let index = (((hours*60 + minutes) / 1440) * 360);
+    let index = ((hours * 60 + minutes) / 1440) * 360;
     return parseInt(index);
 }
 
@@ -619,8 +618,13 @@ function render() {
         if (obj['isRendering']) renderObject(obj);
     }
     let time = getTimeAngle();
-    
-    stationaryLightPosition = vec4(0.0,circlePoints[time % circlePoints.length], 200, 1);
+
+    stationaryLightPosition = vec4(
+        0.0,
+        circlePoints[time % circlePoints.length],
+        200,
+        1
+    );
 
     requestAnimationFrame(render);
 }
@@ -629,6 +633,8 @@ function setDefaultHtmlValues() {
     $('#render').prop('checked', true);
     setSceneSliderValues();
     $('#textureSelect').val(0);
+    let time = new Date();
+    $('#sunTime').val(`${time.getHours()}:${time.getMinutes()}`);
 }
 
 function setupOnClickListeners() {
@@ -723,6 +729,8 @@ function setupOnClickListeners() {
         sceneProperties.far = farDefault;
         sceneProperties.fogIntensity = fogIntensityDefault;
         sceneProperties.ambientIntensity = ambientIntensityDefault;
+        let time = new Date();
+        $('#sunTime').val(`${time.getHours()}:${time.getMinutes()}`);
         setSceneSliderValues();
     });
 
