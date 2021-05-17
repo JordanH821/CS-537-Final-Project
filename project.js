@@ -635,7 +635,11 @@ function setDefaultHtmlValues() {
     setSceneSliderValues();
     $('#textureSelect').val(0);
     let time = new Date();
-    $('#sunTime').val(`${time.getHours()}:${time.getMinutes()}`);
+    let hour = time.getHours();
+    let minutes = time.getMinutes();
+    if (hour.length < 2) hour = `0${hour}`;
+    if (minutes.length < 2) minutes = `0${minutes}`;
+    $('#sunTime').val(`${hour}:${minutes}`);
 }
 
 function setupOnClickListeners() {
@@ -733,7 +737,11 @@ function setupOnClickListeners() {
         sceneProperties.fogIntensity = fogIntensityDefault;
         sceneProperties.ambientIntensity = ambientIntensityDefault;
         let time = new Date();
-        $('#sunTime').val(`${time.getHours()}:${time.getMinutes()}`);
+        let hour = time.getHours();
+        let minutes = time.getMinutes();
+        if (hour.length < 2) hour = `0${hour}`;
+        if (minutes.length < 2) minutes = `0${minutes}`;
+        $('#sunTime').val(`${hour}:${minutes}`);
         setSceneSliderValues();
     });
 
