@@ -8,8 +8,8 @@ let fovDefault = 135.0;
 let aspectDefault = 1;
 let nearDefault = 0.01;
 let farDefault = 5.0;
-let fogIntensityDefault = 0.25;
-let ambientIntensityDefault = 0.1;
+let fogIntensityDefault = 0.0;
+let ambientIntensityDefault = 1.0;
 let currentObject = 0;
 let objects = {};
 let defaults = {};
@@ -867,6 +867,8 @@ function render() {
     for (const obj of Object.values(objects)) {
         if (obj['isRendering']) renderObject(obj);
     }
+    console.log(light.ambient)
+    console.log(light.ambient[0] * .49 * 2)
     requestAnimationFrame(render);
 }
 
