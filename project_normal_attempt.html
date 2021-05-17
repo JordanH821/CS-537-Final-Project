@@ -294,12 +294,12 @@
 
 
                 //check on later
-                V = normalize(-v_tbn_position);
+                V = normalize(v_tbn_position);
 
                 // negative to account for positive Z
                 //N = normalize(normalMatrix * nPosition);
 
-                normalInterp = vec3(normalMatrix * nPosition);
+                normalInterp = -normalize(nPosition * TBN);
 
                 // pass light properties to fragment shader
                 fTexCoord = tPosition;
@@ -337,10 +337,10 @@
 
             void main()
             {
-                vec3 N = texture2D(normalMap, fTexCoord).rgb;
-                N = normalize(N * 2.0 - 1.0);
+                //vec3 N = texture2D(normalMap, fTexCoord).rgb;
+                //N = normalize(N * 2.0 - 1.0);
 
-                //vec3 N = normalize(normalInterp);
+                vec3 N = normalize(normalInterp);
 
                 vec4 textureRGB;
 
@@ -370,7 +370,7 @@
 
                 // diffuse light component
                 // You should set the input texture map as the diffuse albedo (Kd) for both materials
-                vec4 Ids = textureRGB * max(dot(N, L), 0.0) * flDiffuse;
+                vec4 Ids =  max(dot(N, L), 0.0) * flDiffuse;
 
                 //Phong Shading
                 //guide: http://www.cs.toronto.edu/~jacobson/phong-demo/
@@ -385,7 +385,7 @@
                     specular = pow(specAngle, fShininessCoefficient);
                 }
 
-                vec4 lighting = Ias + Ids + flSpecular * specular;
+                vec4 lighting = Ias + Ids + flSpecular * specular * 1.0;
 
                 gl_FragColor = lighting * mix(textureRGB, fFogColor, fFogIntensity);
                 

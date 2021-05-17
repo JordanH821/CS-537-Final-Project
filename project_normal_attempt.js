@@ -44,8 +44,8 @@ let sceneProperties = {
 };
 
 // light constants
-var diffuseConstant = 0.9;
-var specularConstant = 0.8;
+var diffuseConstant = 1.0;
+var specularConstant = 1.0;
 var stationaryLightPosition = vec4(0.0, 100, -100, 1.0);
 
 // material constants
