@@ -312,6 +312,7 @@ function loadedObj(data) {
     currentObject++;
     if (currentObject < objectList.length) {
         loadOBJFromPath(objectList[currentObject]['objPath'], loadedObj);
+        console.log(obj);
     } else {
         setupAfterDataLoad();
     }
@@ -319,7 +320,7 @@ function loadedObj(data) {
 
 function normalMapping(obj){
     var vertPtr = obj['vertices'];
-    var uvPtr = obj['uv'];
+    var uvPtr = obj['texCoords'];
 
 
     var tri = [new vec3(), new vec3(), new vec3()]; //Process Triangle Verts
@@ -342,7 +343,7 @@ function normalMapping(obj){
 
     var avgCount = new Array(vertCount).fill(0); // How many times the vector data has been adde dup, used to avg later
     var tAry = new Array(vertLen).fill(0); //Final Flat Tangent Data - left/right
-    var bAry = new Array(nAry).fill(0); //Final flat bitangent data - up
+    var bAry = new Array(vertLen).fill(0); //Final flat bitangent data - up
     var nAry = new Array(vertLen).fill(0) //Final flat normal data - forward
 
     var x, y , r, i, ii; // resuable vars
@@ -351,9 +352,11 @@ function normalMapping(obj){
         //Get the 3 points of a triangle
         for(y = 0; y < 3; y++){
             i = obj['indices'][x + y] * 3; //Index to flat vertex array
-            ii = obj['indices'][x + y] * 2; //Index to flat uv array
+            //console.log(obj['indices'][x + y] * 3)
+            ii = obj['indices'][x + y] * 3; //Index to flat uv array
 
            tri[y] = vec3Set(tri[y], vertPtr[i], vertPtr[i+1], vertPtr[i+2]);
+          // console.log('tri: ' + tri[y]);
            uv[y] = vec2Set(uv[y], uvPtr[ii], uvPtr[ii+1]);
         }
 
@@ -393,17 +396,17 @@ function normalMapping(obj){
 
         //bitangent = (edge2 * diffUV1.x - edge1 * diffUV2.x) * r
         //edge2.scale(edgeUV1.x, tempA);
-        tempA = scalev(edgeUV1[1], edge2);
+        tempA = scalev(edgeUV1[0], edge2);
         
         //edge1.scale(edgeUV2.x, tempB);
-        tempB = scalev(edgeUV2[1], edge1);
+        tempB = scalev(edgeUV2[0], edge1);
 
         //tempA.sub(tempB, B).scale(r);
         B = subtract(tempA, tempB);
         B = scalev(r, B);
 
         //normal = cross(edge1, edge2)
-       // vec3.cross(edge1, edge2, N)
+        //vec3.cross(edge1, edge2, N)
         N = cross(edge1, edge2);
         //vec3.cross(B, N, T);
         //vec3.cross(T, N, B);
@@ -412,7 +415,7 @@ function normalMapping(obj){
         //Verts are shared between triangles, so add up all the data and any verts that are shared, average the data later
 
         for(y = 0; y < 3; y++){
-            ii = obj['indices'][x + y] //Vertex index
+            ii = obj['indices'][x + y]  * 3; //Vertex index
             i = ii * 3 //vertex flat array index
 
             avgCount[ii]++; //add up how many times this vertex data has been added
@@ -461,15 +464,15 @@ function normalMapping(obj){
 
     for( i = 0; i < vertCount; i++){
         ii = i * 3;
-        vec3Set(tt, tAry[0+ii], tAry[1+ii], tAry[2+ii]);
-        vec3Set(bb, bAry[0+ii], bAry[1+ii], bAry[2+ii]);
-        vec3Set(nn, nAry[0+ii], nAry[1+ii], nAry[2+ii]);
+        tt = vec3Set(tt, tAry[0+ii], tAry[1+ii], tAry[2+ii]);
+        bb = vec3Set(bb, bAry[0+ii], bAry[1+ii], bAry[2+ii]);
+        nn = vec3Set(nn, nAry[0+ii], nAry[1+ii], nAry[2+ii]);
 
         d = dot(nn, tt);
 
         //tt.sub(nn.scale(d,v)).normalize();
         vv = scalev(d, nn);
-        tt = subtract(vv, tt);
+        tt = subtract(tt, vv);
         tt = normalizev(tt);
 
         //d = vec3.dot(vec3.cross(nn, tt, vv), bb);
@@ -483,6 +486,9 @@ function normalMapping(obj){
         tAry[1+ii] = tt[1];
         tAry[2+ii] = tt[2];
     }
+
+    console.log('T: ' + tAry[0] + ',' + tAry[1] + ',' + tAry[2]);
+    console.log('B: ' + bAry[0] + ',' + bAry[1] + ',' + bAry[2]);
 
     //Save data
     obj['tangent'] = tAry;
@@ -867,8 +873,6 @@ function render() {
     for (const obj of Object.values(objects)) {
         if (obj['isRendering']) renderObject(obj);
     }
-    console.log(light.ambient)
-    console.log(light.ambient[0] * .49 * 2)
     requestAnimationFrame(render);
 }
 
