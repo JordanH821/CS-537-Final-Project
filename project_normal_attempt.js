@@ -20,7 +20,9 @@ var cameraPositionIndex = 0;
 var majorAxis = 10;
 var minorAxis = 7;
 
-// ellipse range HTML elements
+var radius = 20;
+
+// circle range HTML elements
 var majorAxisRangeElement;
 var minorAxisRangeElement;
 
@@ -94,6 +96,7 @@ const rotationGetter = {
 };
 
 const normalMatrixGetter = {
+    // https://webglfundamentals.org/webgl/lessons/webgl-3d-lighting-directional.html
     get: function () {
         let worldView = mult(
             mult(sceneProperties.modelViewMatrix, this.rotation),
@@ -149,8 +152,8 @@ objects['puppy'] = puppy;
 let pumpkin = {
     objPath: './objs/pumpkin/pumpkin.obj',
     textureHtmlId: 'pumpkinTexture',
-    vertexShader: 'pumpkin-vertex-shader',
-    fragmentShader: 'pumpkin-fragment-shader',
+    vertexShader: 'vertex-shader',
+    fragmentShader: 'fragment-shader',
     scale: scalem(0.003, 0.003, 0.003),
     translationVector: vec3(0.0, 0.25, 0),
     rotateX: vec4(0, 1, 0, 0),
@@ -158,7 +161,7 @@ let pumpkin = {
     rotateZ: vec4(0, 0, 0, 1),
     isRendering: true,
 };
-// objects['pumpkin'] = pumpkin;
+objects['pumpkin'] = pumpkin;
 
 let rock = {
     objPath: './objs/rock/rock.obj',
@@ -730,6 +733,22 @@ function setupObjectShaderBuffers(obj) {
     );
 }
 
+function getTimeAngle() {
+    let time = document.getElementById('sunTime').value;
+    let hours = '';
+    let minutes = '';
+
+    if (time.length === 0) {
+        hours = new Date().getHours();
+        minutes = new Date().getMinutes();
+    } else {
+        hours = parseInt(time.substr(0, 2));
+        minutes = parseInt(time.substr(3, 5));
+    }
+    let index = ((hours * 60 + minutes) / 1440) * 360;
+    return parseInt(index);
+}
+
 function renderObject(obj) {
     gl.useProgram(obj['shader']);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj['indexBuffer']);
@@ -843,12 +862,12 @@ function ellipse() {
     cameraPositionIndex = 0;
     circlePoints = [];
 
-    let u = vec3(0, 0, 1);
+    let u = vec3(1, 0, 0);
     let v = vec3(1 / Math.sqrt(2), 1 / Math.sqrt(2), 0);
-    for (let deg = 0; deg < 360; deg += 2) {
+    for (let deg = 0; deg < 360; deg += 1) {
         let point = add(
-            scale(majorAxis * Math.cos(radians(deg)), u),
-            scale(minorAxis * Math.sin(radians(deg)), v)
+            scale(radius * Math.cos(radians(deg)), u),
+            scale(radius * Math.sin(radians(deg)), v)
         );
         circlePoints.push(point);
     }
@@ -873,6 +892,15 @@ function render() {
     for (const obj of Object.values(objects)) {
         if (obj['isRendering']) renderObject(obj);
     }
+    let time = getTimeAngle();
+
+    stationaryLightPosition = vec4(
+        0.0,
+        circlePoints[time % circlePoints.length],
+        200,
+        1
+    );
+
     requestAnimationFrame(render);
 }
 
@@ -880,6 +908,13 @@ function setDefaultHtmlValues() {
     $('#render').prop('checked', true);
     setSceneSliderValues();
     $('#textureSelect').val(0);
+    let time = new Date();
+    let hour = time.getHours().toString();
+    let minutes = time.getMinutes().toString();
+    if (hour.length < 2) hour = `0${hour}`;
+    if (minutes.length < 2) minutes = `0${minutes}`;
+    $('#sunTime').val(`${hour}:${minutes}`);
+    $('#sunTime').val(`${hour}:${minutes}`);
 }
 
 function setupOnClickListeners() {
@@ -892,7 +927,9 @@ function setupOnClickListeners() {
     }
 
     $('#objectSelect').on('change', () => {
-        $('#render').prop('checked', getSelectedObject().isRendering);
+        const object = getSelectedObject();
+        $('#render').prop('checked', object.isRendering);
+        $('#textureSelect').val(object['currentTexture']);
     });
 
     $('#render').on('click', () => {
@@ -974,6 +1011,12 @@ function setupOnClickListeners() {
         sceneProperties.far = farDefault;
         sceneProperties.fogIntensity = fogIntensityDefault;
         sceneProperties.ambientIntensity = ambientIntensityDefault;
+        let time = new Date();
+        let hour = time.getHours().toString();
+        let minutes = time.getMinutes().toString();
+        if (hour.length < 2) hour = `0${hour}`;
+        if (minutes.length < 2) minutes = `0${minutes}`;
+        $('#sunTime').val(`${hour}:${minutes}`);
         setSceneSliderValues();
     });
 
